@@ -140,3 +140,36 @@ video {
   border: 2px solid #444;
   box-shadow: 0 0 8px rgba(0,0,0,0.5);
 }
+
+.toast {
+  visibility: hidden;
+  min-width: 200px;
+  background-color: #333;
+  color: #fff;
+  text-align: center;
+  padding: 12px 24px;
+  border-radius: 8px;
+  position: fixed;
+  z-index: 9999;
+  left: 50%;
+  top: 10%;
+  transform: translate(-50%, -50%);
+  font-size: 16px;
+  opacity: 0;
+  transition: opacity 0.4s, visibility 0s linear 0.4s;
+}
+
+.toast.show {
+  visibility: visible;
+  opacity: 1;
+  transition: opacity 0.4s;
+}
+
+.toast.success {
+  background-color: #4CAF50;
+}
+
+.toast.error {
+  background-color: #f44336;
+}
+

@@ -94,18 +94,22 @@ async function initializePeerConnection() {
 function setupPeerConnectionEvents() {
     peerConnection.on('connected', function (id) {
         output(`connected: my id is ${id}`);
+           showToast('Connected', 'success');
     });
 
     peerConnection.on('disconnected', function (reason) {
         output(`disconnected: ${reason}`);
+            showToast('Disconnected', 'error');
     });
 
     peerConnection.on('peerConnected', function (id, name) {
         output(`new user [${id}]${name} enter`);
+            showToast(`${name} entered`, 'success');
     });
 
     peerConnection.on('peerDisonnected', function (id, name) {
         output(`user [${id}]${name} leave`);
+        showToast(`${name} left`, 'error');
     });
 
     peerConnection.on('peerCall', function(id, name) {
@@ -202,3 +206,14 @@ window.refreshAudioDetection = async function() {
     output('Refreshing audio device detection...');
     await initializePeerConnection();
 };
+
+function showToast(message, type = 'success') {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.className = `toast show ${type}`;
+    
+    // Hide after 2s
+    setTimeout(() => {
+        toast.className = 'toast';
+    }, 2000);
+}

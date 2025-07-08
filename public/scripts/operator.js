@@ -1,5 +1,17 @@
 'use strict';
 
+    const logPanel = document.getElementById('logPanel');
+    const logToggleBtn = document.getElementById('logToggleBtn');
+    const hideLogBtn = document.getElementById('hideLogBtn');
+
+    logToggleBtn.addEventListener('click', () => {
+      logPanel.classList.add('show');
+    });
+
+    hideLogBtn.addEventListener('click', () => {
+      logPanel.classList.remove('show');
+    });
+
 function output(message) {
     const c = document.getElementById('console');
     
@@ -214,3 +226,4 @@ window.refreshAudioDetection = async function() {
     output('Refreshing audio device detection...');
     await initializePeerConnection();
 };
+
