@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>GrowlTalk Call</title>
+  <link rel="stylesheet" href="./styles/call.css" />
+</head>
+<body>
+  <div class="call-ui">
+    <h2>Connecting to Operator...</h2>
+
+    <div class="video-section">
+      <video id="remoteVideo" autoplay></video>
+      <video id="localVideo" autoplay muted style="display:none;"></video>
+      <video id="remoteScreen" autoplay style="display:none;"></video>
+    </div>
+
+    <button id="hangUp" class="hangup-btn">🛑 Hang Up</button>
+  </div>
+
+  <script type="text/javascript" src="./scripts/contact-service.js"></script>
+  <script type="text/javascript" src="./scripts/peer-connection.js"></script>
+  <script>
+    // Hang up behavior
+    document.getElementById('hangUp').addEventListener('click', () => {
+      // Call existing logout/hangup logic here
+      if (window.opener && !window.opener.closed) {
+        const logoutBtn = window.opener.document.getElementById('logout');
+        if (logoutBtn) logoutBtn.click();
+      }
+      window.close();
+    });
+
+    // Optionally listen to messages from parent
+    window.addEventListener('message', (event) => {
+      if (event.data.action === 'logout') {
+        window.close();
+      }
+    });
+  </script>
+</body>
+</html>

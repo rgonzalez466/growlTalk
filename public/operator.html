@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self'" />
+    <title>GrowlTalk</title>
+    <link rel="stylesheet" href="./styles/operator.css" />
+  </head>
+  <body>
+    <header class="header">
+      <a href="welcome.html">
+  <img src="assets/growltalk.png" alt="GrowlTalk Logo" class="logo" />
+</a>
+      <div>
+        <h1>GrowlTalk</h1>
+        <h2>Bearly Missing a Word</h2>
+      </div>
+    </header>
+
+    <div class="section">
+      Nginx Address:
+      <input type="text" id="address" />
+      Port:
+      <input type="text" id="port" value="8888" />
+    </div>
+
+    <div class="section">
+      Name:
+     <input type="text" id="name" />
+    </div>
+
+    <div class="section">
+      <input type="button" id="login" value="Login" />
+      <input type="button" id="logout" value="Logout" />
+    </div>
+
+    <hr />
+
+    <div class="section">
+      <strong>Contacts List:</strong>
+      <ul id="contactsList"></ul>
+    </div>
+
+    <hr />
+
+    <div class="section">
+      ID:
+      <input type="text" id="to" />
+      <input type="button" id="call" value="Receive" />
+    </div>
+
+    <div class="section">
+      <input type="button" id="callAny" value="Receive Any" />
+      <input type="button" id="hangUp" value="Hang Up" />
+    </div>
+
+    <hr />
+
+    <div class="section">
+      <strong>Remote Video :</strong>
+      <strong>Remote Screen :</strong>
+      <strong>Local Video</strong>
+<div class="section">
+  <strong>Video Feeds:</strong>
+  <div class="video-section">
+    <div>
+      <label>Remote Video</label><br />
+      <video id="remoteVideo" autoplay width="320" height="240"></video>
+    </div>
+    <div>
+      <label>Remote Screen</label><br />
+      <video id="remoteScreen" autoplay width="320" height="240"></video>
+    </div>
+    <div>
+      <label>Local Video</label><br />
+      <video id="localVideo" autoplay muted width="320" height="240"></video>
+    </div>
+  </div>
+</div>
+
+    </div>
+
+    <hr />
+
+    <div class="section">
+      <strong>Console Log:</strong>
+      <textarea id="console" readonly rows="20" style="width:100%"></textarea>
+    </div>
+
+    <script type="text/javascript" src="./scripts/contact-service.js"></script>
+    <script type="text/javascript" src="./scripts/peer-connection.js"></script>
+    <script type="text/javascript" src="./scripts/index.js"></script>
+  </body>
+</html>
