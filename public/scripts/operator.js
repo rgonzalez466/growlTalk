@@ -121,7 +121,7 @@ function setupPeerConnectionEvents() {
     });
 
     peerConnection.on('peerCall', function(id, name) {
-        return confirm(`user [${id}] ${name} want to call you`);
+        return confirm(`user [${id}] ${name} wants to call you`);
     });
 
     peerConnection.on('sessionConnected', function(id, name) {
