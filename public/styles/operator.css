@@ -13,6 +13,7 @@ body {
   align-items: center;
   gap: 15px;
   margin-bottom: 30px;
+ 
 }
 
 .logo {
@@ -21,6 +22,7 @@ body {
   border-radius: 20%;
   object-fit: cover;
   border: 2px solid #ffb74d;
+      border-radius: 50%;
 }
 
 h1 {

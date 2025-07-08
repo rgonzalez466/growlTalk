@@ -43,7 +43,23 @@ input[type="text"] {
   margin-left: 5px;
 }
 
-input[type="button"] {
+
+.hangup-btn {
+  background-color: red;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  margin: 5px;
+  border-radius: 20px;
+  cursor: pointer;
+}
+
+.hangup-btn:hover {
+  background-color: rgba(255, 0, 0, 0.377);
+}
+
+
+.button {
   background-color: #00796b;
   color: white;
   border: none;
@@ -53,7 +69,7 @@ input[type="button"] {
   cursor: pointer;
 }
 
-input[type="button"]:hover {
+.button:hover {
   background-color: #009688;
 }
 
