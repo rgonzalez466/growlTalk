@@ -125,7 +125,7 @@ function setupPeerConnectionEvents() {
          showToast(`Session with user ${name}`, 'success');
     });
 
-    peerConnection.on('sessionDisonnected', function() {
+    peerConnection.on('sessionDisconnected', function() {
         output('close session');
           showToast(`Disconnected`, 'error');
     });

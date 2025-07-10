@@ -18,12 +18,12 @@ function PeerConnection(properties) {
         if (this.onPeerConnected != null) this.onPeerConnected(id, name);
     };
 
-    contactService.onPeerDisonnected = (id, name) => {
+    contactService.onPeerDisconnected = (id, name) => {
         if (this.peerId === id) {
             closeConnection.call(this);
         }
 
-        if (this.onPeerDisonnected != null) this.onPeerDisonnected(id, name);
+        if (this.onPeerDisconnected != null) this.onPeerDisconnected(id, name);
     };
 
     contactService.onMessage = onMessage.bind(this);
@@ -41,8 +41,8 @@ PeerConnection.prototype.on = function(name, callback) {
     else if (name === 'peerConnected') {
         this.onPeerConnected = callback;
     }
-    else if (name === 'peerDisonnected') {
-        this.onPeerDisonnected = callback;
+    else if (name === 'peerDisconnected') {
+        this.onPeerDisconnected = callback;
     }
     else if (name === 'peerCall') {
         this.onPeerCall = callback;
@@ -50,8 +50,8 @@ PeerConnection.prototype.on = function(name, callback) {
     else if (name === 'sessionConnected') {
         this.onSessionConnected = callback;
     }
-    else if (name === 'sessionDisonnected') {
-        this.onSessionDisonnected = callback;
+    else if (name === 'sessionDisconnected') {
+        this.onSessionDisconnected = callback;
     }
 };
 
@@ -102,7 +102,7 @@ function closeConnection() {
         closeVideo(this.localVideo);
     }
 
-    if (this.onSessionDisonnected != null) this.onSessionDisonnected();
+    if (this.onSessionDisconnected != null) this.onSessionDisconnected();
 }
 
 async function onMessage(from, message) {

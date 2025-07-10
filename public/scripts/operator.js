@@ -105,6 +105,10 @@ function setupPeerConnectionEvents() {
     });
 
     peerConnection.on('peerConnected', function (id, name) {
+      
+        console.log("peerConnected Event");
+        console.log(peerConnection);
+
         if (checkPersona(name) === "kiosk") {
             output(`new user [${id}]${name} enter`);
 
@@ -123,7 +127,7 @@ function setupPeerConnectionEvents() {
         }
     });
 
-    peerConnection.on('peerDisonnected', function (id, name) {
+    peerConnection.on('peerDisconnected', function (id, name) {
         if (checkPersona(name) === "kiosk") {
             output(`user [${id}]${name} leave`);
             showToast(`${name} left`, 'error');
@@ -135,16 +139,27 @@ function setupPeerConnectionEvents() {
         }
     });
 
-    // peerConnection.on('peerCall', function(id, name) {
-    //     return confirm(`user [${id}] ${name} wants to call you`);        
-    // });
+    peerConnection.on('peerCall', function(id, name) {
+
+        console.log("peerCall Event");
+        console.log(peerConnection);
+
+        return confirm(`user [${id}] ${name} wants to call you`);        
+    });
 
     peerConnection.on('sessionConnected', function(id, name) {
+
+        console.log("sessionConnected Event");
+        console.log(peerConnection);
+
         output(`open session with user [${id}]${name}`);
         showToast(`Session with user ${name}`, 'success');
     });
 
-    peerConnection.on('sessionDisonnected', function() {
+    peerConnection.on('sessionDisconnected', function() {
+       console.log("sessionDisconnected Event");
+        console.log(peerConnection);
+
         output('close session');
         showToast(`Disconnected`, 'error');
     });

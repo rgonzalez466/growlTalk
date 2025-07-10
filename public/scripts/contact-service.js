@@ -14,8 +14,8 @@ ContactService.prototype.on = function(name, callback) {
     else if (name === 'peerConnected') {
         this.onPeerConnected = callback;
     }
-    else if (name === 'peerDisonnected') {
-        this.onPeerDisonnected = callback;
+    else if (name === 'peerDisconnected') {
+        this.onPeerDisconnected = callback;
     }
     else if (name === 'message') {
         this.onMessage = callback;
@@ -89,7 +89,7 @@ function handleResponse(response) {
                         }
 
                         if (this.id !== id) {
-                            if (this.onPeerDisonnected != null) this.onPeerDisonnected(id, name);
+                            if (this.onPeerDisconnected != null) this.onPeerDisconnected(id, name);
                         }
                         else {
                             delete this.id;
