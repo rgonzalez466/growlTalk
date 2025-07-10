@@ -94,54 +94,59 @@ async function initializePeerConnection() {
 function setupPeerConnectionEvents() {
     peerConnection.on('connected', function (id) {
         output(`connected: my id is ${id}`);
+        showToast('Connected', 'success');
     });
 
     peerConnection.on('disconnected', function (reason) {
         output(`disconnected: ${reason}`);
-
+        showToast('Disconnected', 'error');
         const ul = document.getElementById('contactsList');
         ul.innerHTML = '';
     });
 
     peerConnection.on('peerConnected', function (id, name) {
-        output(`new user [${id}]${name} enter`);
+        if (checkPersona(name) === "kiosk") {
+            output(`new user [${id}]${name} enter`);
 
-        /*
-         * For whitelist, add custom filter here
-         */
+            showToast(`${name} entered`, 'success');
 
-        let li = document.getElementById(`contactsListItem-${id}`);
-        if (li == null) {
-            li = document.createElement('li');
-            li.id = `contactsListItem-${id}`;
+            let li = document.getElementById(`contactsListItem-${id}`);
+            if (li == null) {
+                li = document.createElement('li');
+                li.id = `contactsListItem-${id}`;
 
-            const ul = document.getElementById('contactsList');
-            ul.appendChild(li);
+                const ul = document.getElementById('contactsList');
+                ul.appendChild(li);
+            }
+
+            li.textContent = `[${id}] ${name}`;
         }
-
-        li.textContent = `[${id}] ${name}`;
     });
 
     peerConnection.on('peerDisonnected', function (id, name) {
-        output(`user [${id}]${name} leave`);
-
-        const li = document.getElementById(`contactsListItem-${id}`);
-        if (li != null) {
-            const ul = document.getElementById('contactsList');
-            ul.removeChild(li);
+        if (checkPersona(name) === "kiosk") {
+            output(`user [${id}]${name} leave`);
+            showToast(`${name} left`, 'error');
+            const li = document.getElementById(`contactsListItem-${id}`);
+            if (li != null) {
+                const ul = document.getElementById('contactsList');
+                ul.removeChild(li);
+            }
         }
     });
 
-    peerConnection.on('peerCall', function(id, name) {
-        return confirm(`user [${id}] ${name} wants to call you`);
-    });
+    // peerConnection.on('peerCall', function(id, name) {
+    //     return confirm(`user [${id}] ${name} wants to call you`);        
+    // });
 
     peerConnection.on('sessionConnected', function(id, name) {
         output(`open session with user [${id}]${name}`);
+        showToast(`Session with user ${name}`, 'success');
     });
 
     peerConnection.on('sessionDisonnected', function() {
         output('close session');
+        showToast(`Disconnected`, 'error');
     });
 }
 
@@ -217,7 +222,6 @@ document.getElementById('hangUp').addEventListener('click', () => {
     const btn = document.getElementById('hangUp');
     btn.disabled = true;
     setTimeout(() => { btn.disabled = false; }, 3000);
-
     peerConnection.hangUp();
 });
 
@@ -227,3 +231,24 @@ window.refreshAudioDetection = async function() {
     await initializePeerConnection();
 };
 
+function showToast(message, type = 'success') {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.className = `toast show ${type}`;
+    
+    // Hide after 2s
+    setTimeout(() => {
+        toast.className = 'toast';
+    }, 2000);
+}
+
+function checkPersona (username){
+    if (username.startsWith("!"))
+    {
+        return "operator"
+    }
+    else
+    {
+        return "kiosk"
+    }
+}

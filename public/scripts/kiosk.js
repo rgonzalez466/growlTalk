@@ -76,8 +76,8 @@ async function initializePeerConnection() {
             frameRate: { max: 30 }
         },
         remoteVideo: document.getElementById('remoteVideo'),
-        remoteScreen: document.getElementById('remoteScreen'),
-        localVideo: document.getElementById('localVideo')
+    //    remoteScreen: document.getElementById('remoteScreen'),
+ //       localVideo: document.getElementById('localVideo')
     });
 
     // Set up all event listeners
@@ -103,13 +103,17 @@ function setupPeerConnectionEvents() {
     });
 
     peerConnection.on('peerConnected', function (id, name) {
-        output(`new user [${id}]${name} enter`);
+        if (checkPersona(name) === "operator") {
+            output(`new user [${id}]${name} enter`);        
             showToast(`${name} entered`, 'success');
+        }
     });
 
-    peerConnection.on('peerDisonnected', function (id, name) {
+    peerConnection.on('peerDisconnected', function (id, name) {
+        if (checkPersona(name) === "operator") {
         output(`user [${id}]${name} leave`);
         showToast(`${name} left`, 'error');
+        }
     });
 
     peerConnection.on('peerCall', function(id, name) {
@@ -118,10 +122,12 @@ function setupPeerConnectionEvents() {
 
     peerConnection.on('sessionConnected', function(id, name) {
         output(`open session with user [${id}]${name}`);
+         showToast(`Session with user ${name}`, 'success');
     });
 
     peerConnection.on('sessionDisonnected', function() {
         output('close session');
+          showToast(`Disconnected`, 'error');
     });
 }
 
@@ -176,30 +182,14 @@ window.addEventListener('beforeunload', () => {
     peerConnection.logout();
 });
 
-document.getElementById('call').addEventListener('click', () => {
-    const btn = document.getElementById('call');
-    btn.disabled = true;
-    setTimeout(() => { btn.disabled = false; }, 3000);
 
-    const to = document.getElementById('to').value;
-    peerConnection.callToPeer(to);
-});
+// document.getElementById('hangUp').addEventListener('click', () => {
+//     const btn = document.getElementById('hangUp');
+//     btn.disabled = true;
+//     setTimeout(() => { btn.disabled = false; }, 3000);
 
-document.getElementById('callAny').addEventListener('click', () => {
-    const btn = document.getElementById('callAny');
-    btn.disabled = true;
-    setTimeout(() => { btn.disabled = false; }, 3000);
-
-    peerConnection.callAnyPeer();
-});
-
-document.getElementById('hangUp').addEventListener('click', () => {
-    const btn = document.getElementById('hangUp');
-    btn.disabled = true;
-    setTimeout(() => { btn.disabled = false; }, 3000);
-
-    peerConnection.hangUp();
-});
+//     peerConnection.hangUp();
+// });
 
 // Optional: Add a function to manually refresh audio detection
 window.refreshAudioDetection = async function() {
@@ -216,4 +206,15 @@ function showToast(message, type = 'success') {
     setTimeout(() => {
         toast.className = 'toast';
     }, 2000);
+}
+
+function checkPersona (username){
+    if (username.startsWith("!"))
+    {      
+        return "operator"
+    }
+    else
+    {      
+        return "kiosk"
+    }
 }
