@@ -233,7 +233,8 @@ document.getElementById('hangUp').addEventListener('click', () => {
     const btn = document.getElementById('hangUp');
     btn.disabled = true;
     setTimeout(() => { btn.disabled = false; }, 3000);
-    peerConnection.hangUp();
+    //peerConnection.hangUp();
+      peerConnection.close();
     
 });
 
