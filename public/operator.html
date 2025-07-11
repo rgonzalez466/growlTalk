@@ -19,17 +19,17 @@
     </header>
 
     <div class="section">
-      Nginx Address:
+    HTTPS API Address:
       <input type="text" id="address" />
       Port:
       <input type="text" id="port" value="8888" />
-      Name:
+    Username:
      <input type="text" id="name" />
     </div>
 
     <div class="section">
-      <input type="button" id="login" value="Login" class="button" />
-      <input type="button" id="logout" value="Logout"  class="hangup-btn" />
+    <input type="button" id="login" value="Call for Help" class="button" />
+    <input type="button" id="logout" value="Disconnect" class="hangup-btn" />
     </div>
 
     <hr />
@@ -55,23 +55,24 @@
       <strong>Remote Video :</strong>
       <strong>Remote Screen :</strong>
       <strong>Local Video</strong>
-<div class="section">
-  <strong>Video Feeds:</strong>
-  <div class="video-section">
-    <div>
-      <label>Remote Video</label><br />
-      <video id="remoteVideo" autoplay width="320" height="240"></video>
-    </div>
-    <div>
-      <label>Remote Screen</label><br />
-      <video id="remoteScreen" autoplay width="320" height="240"></video>
-    </div>
-    <div>
-      <label>Local Video</label><br />
-      <video id="localVideo" autoplay muted width="320" height="240"></video>
-    </div>
-  </div>
-</div>
+
+    <div class="section">
+        <strong>Video Feeds:</strong>
+        <div class="video-section">
+          <div>
+            <label>Remote Video</label><br />
+            <video id="remoteVideo" autoplay width="320" height="240"></video>
+          </div>
+          <div>
+            <label>Remote Screen</label><br />
+            <video id="remoteScreen" autoplay width="320" height="240"></video>
+          </div>
+          <div>
+            <label>Local Video</label><br />
+            <video id="localVideo" autoplay muted width="320" height="240"></video>
+          </div>
+        </div>
+      </div>
 
     </div>
 

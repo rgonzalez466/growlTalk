@@ -42,27 +42,33 @@
     </div>
     <hr />
 
-  <!-- Hidden Call Controls -->
   <div class="section">
     ID:
     <input type="text" id="to" />
     <input type="button" id="call" value="Receive" class="button" />
     <input type="button" id="callAny" value="Receive Any" class="button" />
-    <input type="button" id="hangUp" value="Hang Up" class="hangup-btn" />
+    <input type="button" id="hangUp" value="Hang Up" class="hangup-btn"/>
   </div>
 
   <hr />
 
-  <!-- Video Section -->
-  <div class="section">
-    <strong>Video Feeds:</strong>
-    <div class="video-section">
-      <div>
-        <label>Operator</label><br />
-        <video id="remoteVideo" autoplay width="320" height="240"></video>
+    <div class="section">
+        <strong>Video Feeds:</strong>
+        <div class="video-section">
+          <div>
+            <label>Remote Video</label><br />
+            <video id="remoteVideo" autoplay width="320" height="240"></video>
+          </div>
+          <!-- <div>
+            <label>Remote Screen</label><br />
+            <video id="remoteScreen" autoplay width="320" height="240"></video>
+          </div>
+          <div>
+            <label>Local Video</label><br />
+            <video id="localVideo" autoplay muted width="320" height="240"></video>
+          </div> -->
+        </div>
       </div>
-    </div>
-  </div>
 
   <!-- Hidden Log Panel -->
   <div id="logPanel">
@@ -76,7 +82,5 @@
   <script type="text/javascript" src="./scripts/contact-service.js"></script>
   <script type="text/javascript" src="./scripts/peer-connection.js"></script>
   <script type="text/javascript" src="./scripts/kiosk.js"></script>
-
-
 </body>
 </html>

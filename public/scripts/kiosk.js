@@ -10,7 +10,6 @@
 
     localStorage.setItem('growltalk_name', username);
 
-
     const logPanel = document.getElementById('logPanel');
     const logToggleBtn = document.getElementById('logToggleBtn');
     const hideLogBtn = document.getElementById('hideLogBtn');
@@ -87,8 +86,8 @@ async function initializePeerConnection() {
             frameRate: { max: 30 }
         },
         remoteVideo: document.getElementById('remoteVideo'),
-    //    remoteScreen: document.getElementById('remoteScreen'),
- //       localVideo: document.getElementById('localVideo')
+     //   remoteScreen: document.getElementById('remoteScreen'),
+    //   localVideo: document.getElementById('localVideo')
     });
 
     // Set up all event listeners
@@ -147,7 +146,7 @@ function setupPeerConnectionEvents() {
     });
 
     peerConnection.on('peerCall', function(id, name) {
-        return confirm(`user [${id}] ${name} want to call you`);
+        return confirm(`user [${id}] ${name} wants to call you`);
     });
 
     peerConnection.on('sessionConnected', function(id, name) {
@@ -212,14 +211,30 @@ window.addEventListener('beforeunload', () => {
     peerConnection.logout();
 });
 
+document.getElementById('call').addEventListener('click', () => {
+    const btn = document.getElementById('call');
+    btn.disabled = true;
+    setTimeout(() => { btn.disabled = false; }, 3000);
 
-// document.getElementById('hangUp').addEventListener('click', () => {
-//     const btn = document.getElementById('hangUp');
-//     btn.disabled = true;
-//     setTimeout(() => { btn.disabled = false; }, 3000);
+    const to = document.getElementById('to').value;
+    peerConnection.callToPeer(to);
+});
 
-//     peerConnection.hangUp();
-// });
+document.getElementById('callAny').addEventListener('click', () => {
+
+    const btn = document.getElementById('callAny');
+    btn.disabled = true;
+    setTimeout(() => { btn.disabled = false; }, 3000);
+
+    peerConnection.callAnyPeer();
+});
+
+document.getElementById('hangUp').addEventListener('click', () => {
+    const btn = document.getElementById('hangUp');
+    btn.disabled = true;
+    setTimeout(() => { btn.disabled = false; }, 3000);
+    peerConnection.hangUp();
+});
 
 // Optional: Add a function to manually refresh audio detection
 window.refreshAudioDetection = async function() {
