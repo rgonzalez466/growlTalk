@@ -158,7 +158,8 @@ ContactService.prototype.send = async function(to, message) {
             method: 'POST',
             body: message
         });
-
+        console.log(`/message?peer_id=${this.id}&to=${to}`);
+        console.log(response.message);
         if (!response.ok) {
             // This includes 500 responses
             const text = await response.text(); // Read the error body, if any

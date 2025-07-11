@@ -1,5 +1,15 @@
 'use strict';
 
+    const bearNames = [
+        'Kodiak', 'Baloo', 'Grizz', 'Bjorn', 'Misha',
+        'Nanuk', 'Yogi', 
+        ];
+
+    const bear = bearNames[Math.floor(Math.random() * bearNames.length)];
+    const username = `!${bear}-operator`
+
+    localStorage.setItem('growltalk_name', username);
+
     const logPanel = document.getElementById('logPanel');
     const logToggleBtn = document.getElementById('logToggleBtn');
     const hideLogBtn = document.getElementById('hideLogBtn');

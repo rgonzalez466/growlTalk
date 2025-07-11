@@ -1,5 +1,16 @@
 'use strict';
 
+    const bearNames = [
+        'GrizzlyBear', 'FormosanBear', 'PolarBear', 'Panda', 'BlackBear',
+        'SunBear', 'SpectacledBear', 'SlothBear', 'SpiritBear', 'MoonBear'
+        ];
+
+    const bear = bearNames[Math.floor(Math.random() * bearNames.length)];
+    const username = `${bear}-kiosk`
+
+    localStorage.setItem('growltalk_name', username);
+
+
     const logPanel = document.getElementById('logPanel');
     const logToggleBtn = document.getElementById('logToggleBtn');
     const hideLogBtn = document.getElementById('hideLogBtn');
