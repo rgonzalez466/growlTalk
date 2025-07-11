@@ -104,17 +104,40 @@ async function initializePeerConnection() {
     }
 }
 
+///////////////////////////////////////////////////////////////////////////
+// SHOW / HIDE STICKY NOTE WITH USERNAME 
+///////////////////////////////////////////////////////////////////////////
+function showStickyNote(message) {
+    const sticky = document.getElementById('sticky-note');
+    const header = document.querySelector('.header');
+    sticky.textContent = message;
+    sticky.style.display = 'block';
+    if (header) header.classList.add('with-sticky-note');
+}
+
+function hideStickyNote() {
+    const sticky = document.getElementById('sticky-note');
+    const header = document.querySelector('.header');
+    sticky.style.display = 'none';
+    if (header) header.classList.remove('with-sticky-note');
+}
+
+//////////////////////////////////////////////////////////////////////
 // Setup all peer connection event listeners
+///////////////////////////////////////////////////////////////////////
 function setupPeerConnectionEvents() {
     peerConnection.on('connected', function (id ) {
-        let name = document.getElementById('name').value
-        output(`connected: my id is ${id} - ${name} `);
-        showToast(`Connected: my id is ${id} - ${name} `, 'success');
+        let name = document.getElementById('name').value || '';
+        const msg = `Connected: my id is ${id} - ${name}`;
+        output(msg);
+        //showToast(msg, 'success');
+        showStickyNote(msg)
     });
 
     peerConnection.on('disconnected', function (reason) {
         output(`disconnected: ${reason}`);
         showToast('Disconnected', 'error');
+        hideStickyNote();
         const ul = document.getElementById('contactsList');
         ul.innerHTML = '';
     });
@@ -161,9 +184,7 @@ function setupPeerConnectionEvents() {
 
     peerConnection.on('sessionDisconnected', function() {
         output('close session');
-          showToast(`Disconnected`, 'error');
-
- 
+        showToast(`Disconnected`, 'error');
     });
 }
 

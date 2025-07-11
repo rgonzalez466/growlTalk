@@ -220,3 +220,21 @@ video {
 .toast.error {
   background-color: #f44336;
 }
+
+  .sticky-note {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: #d4edda;
+    color: #155724;
+    padding: 12px;
+    text-align: center;
+    font-weight: bold;
+    z-index: 1000;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  }
+
+  .header.with-sticky-note {
+    margin-top: 48px; /* height of sticky note + spacing */
+  }
