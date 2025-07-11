@@ -17,6 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ipInput.value = data.PROXY_SERVER_IP || '';
         portInput.value = data.PROXY_SERVER_PORT || '';
       });
+
   });
 
   // Close modal

@@ -103,8 +103,9 @@ async function initializePeerConnection() {
 // Setup all peer connection event listeners
 function setupPeerConnectionEvents() {
     peerConnection.on('connected', function (id) {
-        output(`connected: my id is ${id}`);
-        showToast('Connected', 'success');
+        let name = document.getElementById('name').value
+        output(`connected: my id is ${id} - ${name} `);
+        showToast(`Connected: my id is ${id} - ${name} `, 'success');
     });
 
     peerConnection.on('disconnected', function (reason) {
@@ -192,20 +193,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 // Button event listeners
-document.getElementById('login').addEventListener('click', () => {
-    const btn = document.getElementById('login');
-    btn.disabled = true;
-    setTimeout(() => { btn.disabled = false; }, 3000);
 
-    const args = {
-        protocol: 'https',
-        address: document.getElementById('address').value,
-        port: document.getElementById('port').value,
-        name: document.getElementById('name').value
-    };
-
-    peerConnection.login(args);
-});
+// Also bind the button click
+document.getElementById('login').addEventListener('click', handleLoginClick);
 
 document.getElementById('logout').addEventListener('click', () => {
     const btn = document.getElementById('logout');
@@ -261,13 +251,43 @@ function showToast(message, type = 'success') {
     }, 2000);
 }
 
+////////////////////////////////////////////////////////////////////////////////////////
+// CHECK WHETHER THE RECEIVED LOGIN / LOGOUT EVENT IS FROM A KIOSK OR AN OPERATOR
+////////////////////////////////////////////////////////////////////////////////////////
 function checkPersona (username){
     if (username.startsWith("!"))
-    {
-        return "operator"
-    }
-    else
-    {
-        return "kiosk"
-    }
+        { return "operator" }
+    else   
+        { return "kiosk" }
 }
+
+////////////////////////////////////////////////////////////////////////////////////////
+// LOGIN TO VIDEO CALL SERVER (ON CLICK OR ON LOAD PAGE)
+////////////////////////////////////////////////////////////////////////////////////////
+function handleLoginClick() {
+    const btn = document.getElementById('login');
+    btn.disabled = true;
+    setTimeout(() => { btn.disabled = false; }, 3000);
+
+    const args = {
+        protocol: 'https',
+        address: document.getElementById('address').value,
+        port: document.getElementById('port').value,
+        name: document.getElementById('name').value
+    };
+
+     if (args.address && args.port && args.name) {
+        peerConnection.login(args);
+     }
+     else
+     { showToast('Missing Connection Paramers', 'error'); }
+}
+
+/////////////////////////////////////////////////////////////////////////////////
+// AUTO LOGIN TO VIDEO CALL SERVER ON PAGE LOAD
+/////////////////////////////////////////////////////////////////////////////////
+    window.addEventListener('DOMContentLoaded', () => {
+        setTimeout(() => {
+                handleLoginClick();
+        }, 100); // wait 100 ms
+    });

@@ -15,9 +15,6 @@ const isap_server_port = process.env.CALL_SERVER_PORT || 8888 ;
 
 const app = express();
 
-app.use('/favicon.ico', express.static(path.join(__dirname, 'public', 'favicon.ico')));
-
-
 // ⬇️ Serve static files WITHOUT auto-serving index.html
 app.use(express.static(path.join(__dirname, 'public'), {
     index: false // Prevent index.html from automatically being served

@@ -1,5 +1,15 @@
 'use strict';
 
+    const logPanel = document.getElementById('logPanel');
+    const logToggleBtn = document.getElementById('logToggleBtn');
+    const hideLogBtn = document.getElementById('hideLogBtn');
+
+    // Global variable to store the peer connection
+    let peerConnection;
+
+/////////////////////////////////////////////////////////////////
+// GIVE THE KIOSK A RANDOM NAME
+/////////////////////////////////////////////////////////////////
     const bearNames = [
         'GrizzlyBear', 'FormosanBear', 'PolarBear', 'Panda', 'BlackBear',
         'SunBear', 'SpectacledBear', 'SlothBear', 'SpiritBear', 'MoonBear'
@@ -10,18 +20,9 @@
 
     localStorage.setItem('growltalk_name', username);
 
-    const logPanel = document.getElementById('logPanel');
-    const logToggleBtn = document.getElementById('logToggleBtn');
-    const hideLogBtn = document.getElementById('hideLogBtn');
-
-    logToggleBtn.addEventListener('click', () => {
-      logPanel.classList.add('show');
-    });
-
-    hideLogBtn.addEventListener('click', () => {
-      logPanel.classList.remove('show');
-    });
-
+/////////////////////////////////////////////////////////////////
+// LOG VIDEO CALL SERVER EVENTS
+/////////////////////////////////////////////////////////////////
 function output(message) {
     const c = document.getElementById('console');
     
@@ -30,7 +31,10 @@ function output(message) {
     c.scrollTop = c.scrollHeight;
 }
 
-// Function to check if audio devices are available
+/////////////////////////////////////////////////////////////////
+// CHECK IF THE KIOSK HAS ANY AUDIO DEVICES
+/////////////////////////////////////////////////////////////////
+
 async function checkAudioDevices() {
     try {
         // Check if MediaDevices API is available
@@ -70,16 +74,16 @@ async function checkAudioDevices() {
     }
 }
 
-// Global variable to store the peer connection
-let peerConnection;
-
-// Initialize PeerConnection with conditional audio
+/////////////////////////////////////////////////////////////////
+// INITIALIZE PEER CONNECTION
+/////////////////////////////////////////////////////////////////
 async function initializePeerConnection() {
-    const hasAudio = await checkAudioDevices();
+
+    const hasAudio = await checkAudioDevices(); // Conditionally enable audio
     
     peerConnection = new PeerConnection({
         constraints: {
-            audio: hasAudio, // Conditionally enable audio
+            audio: hasAudio, 
             video: true,
             width: { ideal: 320 },
             height: { ideal: 240 },
@@ -102,9 +106,10 @@ async function initializePeerConnection() {
 
 // Setup all peer connection event listeners
 function setupPeerConnectionEvents() {
-    peerConnection.on('connected', function (id) {
-        output(`connected: my id is ${id}`);
-           showToast('Connected', 'success');
+    peerConnection.on('connected', function (id ) {
+        let name = document.getElementById('name').value
+        output(`connected: my id is ${id} - ${name} `);
+        showToast(`Connected: my id is ${id} - ${name} `, 'success');
     });
 
     peerConnection.on('disconnected', function (reason) {
@@ -186,20 +191,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 // Button event listeners
-document.getElementById('login').addEventListener('click', () => {
-    const btn = document.getElementById('login');
-    btn.disabled = true;
-    setTimeout(() => { btn.disabled = false; }, 3000);
+    logToggleBtn.addEventListener('click', () => {
+      logPanel.classList.add('show');
+    });
 
-    const args = {
-        protocol: 'https',
-        address: document.getElementById('address').value,
-        port: document.getElementById('port').value,
-        name: document.getElementById('name').value
-    };
+    hideLogBtn.addEventListener('click', () => {
+      logPanel.classList.remove('show');
+    });
 
-    peerConnection.login(args);
-});
+// Also bind the button click
+document.getElementById('login').addEventListener('click', handleLoginClick);
 
 document.getElementById('logout').addEventListener('click', () => {
     const btn = document.getElementById('logout');
@@ -255,13 +256,43 @@ function showToast(message, type = 'success') {
     }, 2000);
 }
 
+////////////////////////////////////////////////////////////////////////////////////////
+// CHECK WHETHER THE RECEIVED LOGIN / LOGOUT EVENT IS FROM A KIOSK OR AN OPERATOR
+////////////////////////////////////////////////////////////////////////////////////////
 function checkPersona (username){
     if (username.startsWith("!"))
-    {      
-        return "operator"
-    }
-    else
-    {      
-        return "kiosk"
-    }
+        { return "operator" }
+    else   
+        { return "kiosk" }
 }
+
+////////////////////////////////////////////////////////////////////////////////////////
+// LOGIN TO VIDEO CALL SERVER (ON CLICK OR ON LOAD PAGE)
+////////////////////////////////////////////////////////////////////////////////////////
+function handleLoginClick() {
+    const btn = document.getElementById('login');
+    btn.disabled = true;
+    setTimeout(() => { btn.disabled = false; }, 3000);
+
+    const args = {
+        protocol: 'https',
+        address: document.getElementById('address').value,
+        port: document.getElementById('port').value,
+        name: document.getElementById('name').value
+    };
+
+     if (args.address && args.port && args.name) {
+        peerConnection.login(args);
+     }
+     else
+     { showToast('Missing Connection Paramers', 'error'); }
+}
+
+/////////////////////////////////////////////////////////////////////////////////
+// AUTO LOGIN TO VIDEO CALL SERVER ON PAGE LOAD
+/////////////////////////////////////////////////////////////////////////////////
+    window.addEventListener('DOMContentLoaded', () => {
+        setTimeout(() => {
+                handleLoginClick();
+        }, 100); // wait 100 ms
+    });
