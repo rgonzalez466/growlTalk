@@ -116,9 +116,6 @@ function setupPeerConnectionEvents() {
 
     peerConnection.on('peerConnected', function (id, name) {
       
-        console.log("peerConnected Event");
-        console.log(peerConnection);
-
         if (checkPersona(name) === "kiosk") {
             output(`new user [${id}]${name} enter`);
 
@@ -151,16 +148,10 @@ function setupPeerConnectionEvents() {
 
     peerConnection.on('peerCall', function(id, name) {
 
-        console.log("peerCall Event");
-        console.log(peerConnection);
-
         return confirm(`user [${id}] ${name} wants to call you`);        
     });
 
     peerConnection.on('sessionConnected', function(id, name) {
-
-        console.log("sessionConnected Event");
-        console.log(peerConnection);
 
         output(`open session with user [${id}]${name}`);
         showToast(`Session with user ${name}`, 'success');
@@ -169,7 +160,9 @@ function setupPeerConnectionEvents() {
     peerConnection.on('sessionDisconnected', function() {
        console.log("sessionDisconnected Event");
         console.log(peerConnection);
-
+ 
+        peerConnection.hangUp();
+ 
         output('close session');
         showToast(`Disconnected`, 'error');
     });
@@ -248,7 +241,7 @@ document.getElementById('hangUp').addEventListener('click', () => {
     btn.disabled = true;
     setTimeout(() => { btn.disabled = false; }, 3000);
     peerConnection.hangUp();
-    peerConnection.getTracks().forEach(track => track.stop());
+ 
 });
 
 // Optional: Add a function to manually refresh audio detection

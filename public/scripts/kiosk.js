@@ -157,6 +157,8 @@ function setupPeerConnectionEvents() {
     peerConnection.on('sessionDisconnected', function() {
         output('close session');
           showToast(`Disconnected`, 'error');
+
+ 
     });
 }
 
@@ -232,10 +234,8 @@ document.getElementById('callAny').addEventListener('click', () => {
 document.getElementById('hangUp').addEventListener('click', () => {
     const btn = document.getElementById('hangUp');
     btn.disabled = true;
-    setTimeout(() => { btn.disabled = false; }, 3000);
-    //peerConnection.hangUp();
-      peerConnection.close();
-    
+    setTimeout(() => { btn.disabled = false; }, 3000);  
+    peerConnection.hangUp();
 });
 
 // Optional: Add a function to manually refresh audio detection
