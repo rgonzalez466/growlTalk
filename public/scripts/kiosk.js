@@ -234,6 +234,7 @@ document.getElementById('hangUp').addEventListener('click', () => {
     btn.disabled = true;
     setTimeout(() => { btn.disabled = false; }, 3000);
     peerConnection.hangUp();
+    
 });
 
 // Optional: Add a function to manually refresh audio detection
