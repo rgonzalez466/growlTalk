@@ -43,18 +43,15 @@
     <hr />
 
   <!-- Hidden Call Controls -->
-  <div class="section" style="display: none;">
+  <div class="section">
     ID:
     <input type="text" id="to" />
-    <input type="button" id="call" value="Receive" />
+    <input type="button" id="call" value="Receive" class="button" />
+    <input type="button" id="callAny" value="Receive Any" class="button" />
+    <input type="button" id="hangUp" value="Hang Up" class="hangup-btn" />
   </div>
 
-  <div class="section" style="display: none;">
-    <input type="button" id="callAny" value="Receive Any" />
-    <input type="button" id="hangUp" value="Hang Up" />
-  </div>
-
-  <hr style="display: none;" />
+  <hr />
 
   <!-- Video Section -->
   <div class="section">
@@ -63,12 +60,6 @@
       <div>
         <label>Operator</label><br />
         <video id="remoteVideo" autoplay width="320" height="240"></video>
-      </div>
-      <div>
-        <video id="remoteScreen" autoplay width="320" height="240" style="display: none;"></video>
-      </div>
-      <div>
-        <video id="localVideo" autoplay muted width="320" height="240" style="display: none;"></video>
       </div>
     </div>
   </div>
