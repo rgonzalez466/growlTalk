@@ -99,13 +99,27 @@ function setupPeerConnectionEvents() {
 
     peerConnection.on('disconnected', function (reason) {
         output(`disconnected: ${reason}`);
-            showToast('Disconnected', 'error');
+        showToast('Disconnected', 'error');
+        const ul = document.getElementById('contactsList');
+        ul.innerHTML = '';
     });
 
     peerConnection.on('peerConnected', function (id, name) {
         if (checkPersona(name) === "operator") {
             output(`new user [${id}]${name} enter`);        
             showToast(`${name} entered`, 'success');
+
+            let li = document.getElementById(`contactsListItem-${id}`);
+            if (li == null) {
+                li = document.createElement('li');
+                li.id = `contactsListItem-${id}`;
+
+                const ul = document.getElementById('contactsList');
+                ul.appendChild(li);
+            }
+
+            li.textContent = `[${id}] ${name}`;            
+
         }
     });
 
@@ -113,6 +127,11 @@ function setupPeerConnectionEvents() {
         if (checkPersona(name) === "operator") {
         output(`user [${id}]${name} leave`);
         showToast(`${name} left`, 'error');
+        const li = document.getElementById(`contactsListItem-${id}`);
+            if (li != null) {
+                const ul = document.getElementById('contactsList');
+                ul.removeChild(li);
+            }        
         }
     });
 

@@ -153,11 +153,36 @@ ContactService.prototype.logout = async function() {
 ContactService.prototype.send = async function(to, message) {
     if (!this.id) return;
 
-    await fetch(`${this.protocol}://${this.address}:${this.port}${this.prefix}/message?peer_id=${this.id}&to=${to}`, {
-        method: 'POST',
-        body: message
-    })
-    .catch(e => {
+    try {
+        const response = await fetch(`${this.protocol}://${this.address}:${this.port}${this.prefix}/message?peer_id=${this.id}&to=${to}`, {
+            method: 'POST',
+            body: message
+        });
+
+        if (!response.ok) {
+            // This includes 500 responses
+            const text = await response.text(); // Read the error body, if any
+            showToast(`Server error: ${response.status} ${text || 'Internal Server Error'}`, 'error');
+            console.error(`Server responded with ${response.status}: ${text}`);
+       //     throw new Error(`Server responded with status ${response.status}`);
+        }
+
+    } catch (e) {
+        // Handles network errors, timeouts, and fetch rejections
+        console.error("Send failed:", e);
+        showToast(`Network error: ${e.message}`, 'error');
         throw e;
-    });
+    }
+};
+
+
+function showToast(message, type = 'success') {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.className = `toast show ${type}`;
+    
+    // Hide after 2s
+    setTimeout(() => {
+        toast.className = 'toast';
+    }, 2000);
 }
