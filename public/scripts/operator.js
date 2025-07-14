@@ -1,7 +1,7 @@
 'use strict';
 
     const bearNames = [
-        'Kodiak', 'Baloo', 'Grizz', 'Bjorn', 'Misha',
+        'Teddy', 'Baloo', 'Grizz', 'Bjorn', 'Misha',
         'Nanuk', 'Yogi', 
         ];
 
@@ -171,8 +171,8 @@ function setupPeerConnectionEvents() {
         }
     });
 
-    peerConnection.on('peerCall', function(id, name) {
-        return confirm(`user [${id}] ${name} wants to call you`);        
+    peerConnection.on('peerCall', async function(id, name) {
+        return await showIncomingCallPopup(id, name);
     });
 
     peerConnection.on('sessionConnected', function(id, name) {
@@ -313,3 +313,37 @@ function handleLoginClick() {
         }, 100); // wait 100 ms
     });
 
+/////////////////////////////////////////////////////////////////////////////////
+// SHOW INCOMING CALL TO OPERATOR
+/////////////////////////////////////////////////////////////////////////////////
+
+function showIncomingCallPopup(id, name) {
+    return new Promise(resolve => {
+        const overlay = document.getElementById('incoming-call-overlay');
+        const avatar = document.getElementById('caller-avatar');
+        const callerName = document.querySelector('.caller-name');
+        const subtext = document.querySelector('.caller-subtext');
+        const answerBtn = document.getElementById('answer-call-btn');
+
+        callerName.textContent = id + " " + name;
+        subtext.textContent = 'is calling you';
+        overlay.style.display = 'flex';
+
+        // Set a custom avatar if available (optional)
+        avatar.src = `assets/kiosk.png`; // fallback will be used if it fails
+
+
+        const audio = new Audio('assets/bear.mp3');
+        audio.loop = true;
+        audio.play().catch(() => {
+            console.warn("Autoplay failed. Will wait for user interaction.");
+        });
+
+        answerBtn.onclick = () => {
+            audio.pause();
+            audio.currentTime = 0;
+            overlay.style.display = 'none';
+            resolve(true); // Accept the call
+        };
+    });
+}

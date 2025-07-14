@@ -1,59 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Welcome to GrowlTalk</title>
-  <link rel="stylesheet" href="./styles/welcome.css" />
-  <script type="text/javascript" src="./scripts/welcome.js" defer></script>
-  <script type="text/javascript" src="./scripts/settings.js" defer></script>
-</head>
-<body>
-  <!-- Gear icon -->
-  <div class="settings-icon" title="Configure Server">⚙️</div>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Welcome to GrowlTalk</title>
+    <link rel="stylesheet" href="./styles/welcome.css" />
+    <script type="text/javascript" src="./scripts/welcome.js" defer></script>
+  </head>
+  <body>
+    <!-- Hero Section -->
+    <section class="hero">
+      <img src="./assets/growltalk.png" alt="GrowlTalk Logo" class="logo" />
+      <div class="titles">
+        <h1>GrowlTalk</h1>
+        <h2>Bearly Missing a Word</h2>
+      </div>
+    </section>
 
-  <!-- Hero Section -->
-  <section class="hero">
-    <img src="./assets/growltalk.png" alt="GrowlTalk Logo" class="logo" />
-    <div class="titles">
-      <h1>GrowlTalk</h1>
-      <h2>Bearly Missing a Word</h2>
-    </div>
-  </section>
-
-  <!-- Main Login Buttons -->
-  <div class="container">
-    <h3>Select Your Login Type</h3>
-    <div class="button-group">
-      <button class="login-button" data-role="kiosk">
-        <img src="./assets/kiosk.png" alt="Kiosk" />
-        <span>Kiosk Login</span>
-      </button>
-      <button class="login-button" data-role="operator">
-        <img src="./assets/operator.png" alt="Operator" />
-        <span>Operator Login</span>
-      </button>
-    </div>
-  </div>
-
-  <!-- Modal for Server Config -->
-  <div id="settingsModal" class="modal">
-    <div class="modal-content">
-      <h3>Video Call Server Configuration</h3>
-      <label for="serverIp">Video Call Server IP:</label>
-      <input type="text" id="serverIp" />
-      <label for="serverPort">Video Call Server Port:</label>
-      <input type="text" id="serverPort" />
-      <div class="modal-buttons">
-        <button id="saveSettings">Save</button>
-        <button id="closeModal">Close</button>
+    <!-- Main Login Buttons -->
+    <div class="container">
+      <h3>Select Your Login Type</h3>
+      <div class="button-group">
+        <button class="login-button" data-role="kiosk">
+          <img src="./assets/kiosk.png" alt="Kiosk" />
+          <span>Kiosk Login</span>
+        </button>
+        <button class="login-button" data-role="operator">
+          <img src="./assets/operator.png" alt="Operator" />
+          <span>Operator Login</span>
+        </button>
       </div>
     </div>
-  </div>
 
-  <!-- Footer with Bear Puns -->
-  <footer>
-    <p>🐻 Stay pawsitive and keep growling!</p>
-    <p>We’re not lying — this is the bearst way to video chat!</p>
-  </footer>
-</body>
+    <!-- Footer with Bear Puns -->
+    <footer>
+      <p>🐻 Stay pawsitive and keep growling!</p>
+      <p>We’re not lying — this is the bearst way to video chat!</p>
+    </footer>
+  </body>
 </html>

@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -9,29 +9,29 @@
   <body>
     <header class="header">
       <a href="welcome.html">
-  <img src="assets/operator.png" alt="GrowlTalk Logo" class="logo" />
-</a>
+        <img src="assets/operator.png" alt="GrowlTalk Logo" class="logo" />
+      </a>
       <div>
         <h1>GrowlTalk</h1>
         <h2>Bearly Missing a Word</h2>
       </div>
-       <button id="logToggleBtn">Show Logs</button>
+      <button id="logToggleBtn">Show Logs</button>
     </header>
 
-    <div id="sticky-note" class="sticky-note" style="display: none;"></div>
+    <div id="sticky-note" class="sticky-note" style="display: none"></div>
 
     <div class="section">
-    HTTPS API Address:
+      HTTPS API Address:
       <input type="text" id="address" />
       Port:
       <input type="text" id="port" value="8888" />
-    Username:
-     <input type="text" id="name" />
+      Username:
+      <input type="text" id="name" />
     </div>
 
     <div class="section">
-    <input type="button" id="login" value="Call for Help" class="button" />
-    <input type="button" id="logout" value="Disconnect" class="hangup-btn" />
+      <input type="button" id="login" value="Call for Help" class="button" />
+      <input type="button" id="logout" value="Disconnect" class="hangup-btn" />
     </div>
 
     <hr />
@@ -48,7 +48,7 @@
       <input type="text" id="to" />
       <input type="button" id="call" value="Receive" class="button" />
       <input type="button" id="callAny" value="Receive Any" class="button" />
-      <input type="button" id="hangUp" value="Hang Up" class="hangup-btn"/>
+      <input type="button" id="hangUp" value="Hang Up" class="hangup-btn" />
     </div>
 
     <hr />
@@ -58,7 +58,7 @@
       <strong>Remote Screen :</strong>
       <strong>Local Video</strong>
 
-    <div class="section">
+      <div class="section">
         <strong>Video Feeds:</strong>
         <div class="video-section">
           <div>
@@ -71,26 +71,48 @@
           </div>
           <div>
             <label>Local Video</label><br />
-            <video id="localVideo" autoplay muted width="320" height="240"></video>
+            <video
+              id="localVideo"
+              autoplay
+              muted
+              width="320"
+              height="240"
+            ></video>
           </div>
         </div>
       </div>
-
     </div>
 
-  <!-- Hidden Log Panel -->
-  <div id="logPanel">
-    <h3>Console Log</h3>
-    <textarea id="console" readonly></textarea>
-    <button id="hideLogBtn">Hide</button>
-  </div>
-    
+    <!-- Hidden Log Panel -->
+    <div id="logPanel">
+      <h3>Console Log</h3>
+      <textarea id="console" readonly></textarea>
+      <button id="hideLogBtn">Hide</button>
+    </div>
+
     <!-- <hr />
 
     <div class="section">
       <strong>Console Log:</strong>
       <textarea id="console" readonly rows="20" style="width:100%"></textarea>
     </div> -->
+
+    <!-- Incoming Call Popup -->
+    <div id="incoming-call-overlay" style="display: none">
+      <div id="incoming-call-popup">
+        <p class="call-title">Incoming call</p>
+        <img
+          id="caller-avatar"
+          class="caller-avatar"
+          src="./assets/kiosk.png"
+          alt="Avatar"
+        />
+        <p class="caller-name">A BEAR</p>
+        <p class="caller-subtext">is calling you</p>
+        <button id="answer-call-btn" class="accept-button">📞 Accept</button>
+      </div>
+    </div>
+
     <div id="toast" class="toast"></div>
 
     <script type="text/javascript" src="./scripts/contact-service.js"></script>

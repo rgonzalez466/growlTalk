@@ -238,3 +238,68 @@ video {
   .header.with-sticky-note {
     margin-top: 48px; /* height of sticky note + spacing */
   }
+
+
+  #incoming-call-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.75);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+  }
+
+  #incoming-call-popup {
+    background-color: #0e4e06;
+    color: #fff;
+    padding: 30px;
+    border-radius: 20px;
+    width: 280px;
+    text-align: center;
+    font-family: sans-serif;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.61);
+  }
+
+  .call-title {
+    font-size: 14px;
+    color: #aaa;
+    margin-bottom: 10px;
+  }
+
+  .caller-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 10px;
+  }
+
+  .caller-name {
+    font-size: 20px;
+    font-weight: bold;
+    margin: 10px 0 4px;
+  }
+
+  .caller-subtext {
+    font-size: 14px;
+    color: #ccc;
+    margin-bottom: 20px;
+  }
+
+  .accept-button {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    font-size: 16px;
+    border-radius: 25px;
+    cursor: pointer;
+  }
+
+  .accept-button:hover {
+    background-color: #218838;
+  }

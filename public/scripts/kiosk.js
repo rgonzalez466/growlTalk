@@ -90,8 +90,8 @@ async function initializePeerConnection() {
             frameRate: { max: 30 }
         },
         remoteVideo: document.getElementById('remoteVideo'),
-     //   remoteScreen: document.getElementById('remoteScreen'),
-    //   localVideo: document.getElementById('localVideo')
+        remoteScreen: document.getElementById('remoteScreen'),
+        localVideo: document.getElementById('localVideo')
     });
 
     // Set up all event listeners
