@@ -1,37 +1,206 @@
 "use strict";
 
-const express = require("express");
-const bodyParser = require("body-parser");
-const fs = require("fs");
-const fetch = require("node-fetch");
-const AbortController = require("abort-controller");
-const https = require("https");
-const path = require("path");
-require("dotenv").config();
+import express from "express";
+import fs from "fs";
+import https from "https";
+import path from "path";
+import dotenv from "dotenv";
+import { getCurrentDateTime } from "./controllers/misc.js";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
+import { styleText } from "node:util";
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// GLOBAL VARS
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+let sdpClients = [];
+dotenv.config();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 const port = process.env.SERVER_PORT || 9999;
-
 const app = express();
 
-// ⬇️ Serve static files WITHOUT auto-serving index.html
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// SERVE STATIC FILES IN THE PUBLIC FOLDER
+///////////////////////////////////////////////////////////////////////////////////////////////////
 app.use(
   express.static(path.join(__dirname, "public"), {
-    index: false, // Prevent index.html from automatically being served
+    index: false,
   })
 );
 
-app.get("/favicon.ico", (req, res) => res.status(204));
+app.get("/assets/favicon.ico", (req, res) => res.status(204));
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// SET WELCOME HTML AS THE HOME PAGE
+///////////////////////////////////////////////////////////////////////////////////////////////////
 // ⬇️ Serve welcome.html FIRST on root path "/"
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "welcome.html"));
 });
 
-// ⬇️ HTTPS Certificate and Server Start
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// GET ALL CALLERS (KIOSK AND OPERATOR)
+///////////////////////////////////////////////////////////////////////////////////////////////////
+app.get("/callers", (req, res) => {
+  const { callerStatus, callerType } = req.query;
+
+  console.log(
+    styleText(
+      "cyan",
+      `GET ALL CALLERS: ===> ` +
+        `callerStatus : ${callerStatus || "filter Not provided"}` +
+        ` , callerType : ${callerType || "filter Not provided"}`
+    )
+  );
+
+  let filteredSdpClients = sdpClients;
+  if (callerStatus || callerType) {
+    if (callerType) {
+      filteredSdpClients = filteredSdpClients.filter(
+        (sdpClient) => sdpClient.callerType === callerType
+      );
+
+      console.log(
+        styleText(
+          "green",
+          `GET ALL CALLERS: ===> with callerType ${callerType} , total: ${filteredSdpClients.length}`
+        )
+      );
+    }
+
+    if (callerStatus) {
+      filteredSdpClients = filteredSdpClients.filter(
+        (sdpClient) => sdpClient.callerStatus === callerStatus
+      );
+
+      console.log(
+        styleText(
+          "green",
+          `GET ALL CALLERS: ===> with callerStatus ${callerStatus} , total: ${filteredSdpClients.length}`
+        )
+      );
+    }
+
+    res
+      .status(200)
+      .json({ totalClients: filteredSdpClients.length, filteredSdpClients });
+  } else {
+    console.log(
+      styleText("green", `GET ALL CALLERS: ===> ${filteredSdpClients.length}`)
+    );
+
+    res.status(200).json({
+      totalClients: filteredSdpClients.length,
+      filteredSdpClients,
+    });
+  }
+});
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// SIGN IN CALLERS (KIOSK AND OPERATOR)
+///////////////////////////////////////////////////////////////////////////////////////////////////
+app.get("/signin", (req, res) => {
+  const { callerType, callerName } = req.query;
+
+  console.log(
+    styleText(
+      "cyan",
+      `SIGN IN REQUEST: ===> ` +
+        `callerType: ${callerType || "Not provided"} , ` +
+        `callerName: ${callerName || "Not provided"}`
+    )
+  );
+
+  if (
+    callerType &&
+    callerName &&
+    (callerType === "kiosk" || callerType === "operator")
+  ) {
+    const currentMilliseconds = Date.now();
+
+    sdpClients.push({
+      callerId: currentMilliseconds,
+      callerType: callerType,
+      callerName: callerName,
+      callerStatus: "AVAILABLE",
+      callerLastMessageOn: currentMilliseconds,
+      callerConnectedOn: getCurrentDateTime(),
+    });
+
+    console.log(
+      styleText(
+        "green",
+        `SIGN IN RESPONSE ===> callerId: ${currentMilliseconds} was assigned to ${callerType}:${callerName}`
+      )
+    );
+
+    res.status(200).json({ callerId: currentMilliseconds });
+  } else {
+    console.log(
+      styleText(
+        "red",
+        `SIGN IN RESPONSE ===> Missing Parameters / Invalid Caller Type ... ${callerType}:${callerName}`
+      )
+    );
+
+    res.status(400).json({
+      callerType: callerType,
+      callerName: callerName,
+      message: "Missing Parameters / Invalid Caller Type",
+    });
+  }
+});
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// SIGN OUT CALLERS (KIOSK AND OPERATOR)
+///////////////////////////////////////////////////////////////////////////////////////////////////
+app.get("/signout", (req, res) => {
+  const { callerId } = req.query;
+  console.log(
+    styleText(
+      "cyan",
+      `SIGN OUT REQUEST ===> ` + `callerType: ${callerId || "Not provided"}`
+    )
+  );
+
+  const foundIndex = sdpClients.findIndex((sdpClient) => {
+    return String(sdpClient.callerId) === String(callerId);
+  });
+
+  // delete the caller id from array
+  if (callerId && foundIndex !== -1) {
+    sdpClients = [
+      ...sdpClients.slice(0, foundIndex),
+      ...sdpClients.slice(foundIndex + 1),
+    ];
+
+    res
+      .status(200)
+      .json({ callerId: callerId, message: "Caller Id has signed out" });
+    //caller not found exception
+  } else {
+    console.log(
+      styleText("red", `SIGN OUT RESPONSE ===> callerId ${callerId} not found `)
+    );
+
+    res
+      .status(404)
+      .json({ callerId: callerId, message: "Caller Id not found" });
+  }
+});
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// LOAD TLS CERTIFICATES FOR HTTPS
+///////////////////////////////////////////////////////////////////////////////////////////////////
 const key = fs.readFileSync(__dirname + "/cert/www.isapsolution.com.key");
 const cert = fs.readFileSync(__dirname + "/cert/www.isapsolution.com.crt");
-
 const server = https.createServer({ key, cert }, app);
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// START HTTPS SERVER
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 server.listen(port, () => {
   console.log(`HTTPS server started on port ${port}`);
