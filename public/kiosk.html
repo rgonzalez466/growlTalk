@@ -1,88 +1,60 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta http-equiv="Content-Security-Policy" content="script-src 'self'" />
-  <title>GrowlTalk</title>
-  <link rel="stylesheet" href="./styles/kiosk.css" />
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self'" />
+    <title>GrowlTalk</title>
+    <link rel="stylesheet" href="./styles/kiosk.css" />
+  </head>
 
-</head>
+  <body>
+    <header class="header">
+      <a href="welcome.html">
+        <img src="assets/kiosk.png" alt="GrowlTalk Logo" class="logo" />
+      </a>
+      <div>
+        <h1>GrowlTalk</h1>
+        <h2>Bearly Missing a Word</h2>
+      </div>
+      <button id="logToggleBtn">Show Logs</button>
+    </header>
 
-<body>
-  <header class="header">
-    <a href="welcome.html">
-      <img src="assets/kiosk.png" alt="GrowlTalk Logo" class="logo" />
-    </a>
-    <div>
-      <h1>GrowlTalk</h1>
-      <h2>Bearly Missing a Word</h2>
-    </div>
-    <button id="logToggleBtn">Show Logs</button>
-  </header>
-
-  <div id="sticky-note" class="sticky-note" style="display: none;"></div>
-
-  <div class="section">
-    HTTPS API Address:
-    <input type="text" id="address" />
-    Port:
-    <input type="text" id="port" value="8888" />
-    Username:
-    <input type="text" id="name" />
-  </div>
-
-  <div class="section">
-    <input type="button" id="login" value="Call for Help" class="button" />
-    <input type="button" id="logout" value="Disconnect" class="hangup-btn" />
-  </div>
-
-  <hr />
-
-      <div class="section">
-      <strong>Online Operators:</strong>
-      <ul id="contactsList"></ul>
-    </div>
-    <hr />
-
-  <div class="section">
-    ID:
-    <input type="text" id="to" />
-    <input type="button" id="call" value="Receive" class="button" />
-    <input type="button" id="callAny" value="Receive Any" class="button" />
-    <input type="button" id="hangUp" value="Hang Up" class="hangup-btn" style="display: none;"/>
-  </div>
-
-  <hr />
+    <div id="sticky-note" class="sticky-note" style="display: none"></div>
 
     <div class="section">
-        <strong>Video Feeds:</strong>
-        <div class="video-section">
-          <div>
-            <label>Remote Video</label><br />
-            <video id="remoteVideo" autoplay width="320" height="240"></video>
-          </div>
-          <div>
-            <label>Remote Screen</label><br />
-            <video id="remoteScreen" autoplay width="320" height="240"></video>
-          </div>
-          <div>
-            <label>Local Video</label><br />
-            <video id="localVideo" autoplay muted width="320" height="240"></video>
-          </div>
+      <strong>Video Feeds:</strong>
+      <div class="video-section">
+        <div>
+          <label>Remote Video</label><br />
+          <video id="remoteVideo" autoplay width="320" height="240"></video>
+        </div>
+        <div>
+          <label>Remote Screen</label><br />
+          <video id="remoteScreen" autoplay width="320" height="240"></video>
+        </div>
+        <div>
+          <label>Local Video</label><br />
+          <video
+            id="localVideo"
+            autoplay
+            muted
+            width="320"
+            height="240"
+          ></video>
         </div>
       </div>
+    </div>
 
-  <!-- Hidden Log Panel -->
-  <div id="logPanel">
-    <h3>Console Log</h3>
-    <textarea id="console" readonly></textarea>
-    <button id="hideLogBtn">Hide</button>
-  </div>
+    <!-- Hidden Log Panel -->
+    <div id="logPanel">
+      <h3>Console Log</h3>
+      <textarea id="console" readonly></textarea>
+      <button id="hideLogBtn">Hide</button>
+    </div>
 
-<div id="toast" class="toast"></div>
+    <div id="toast" class="toast"></div>
 
-  <script type="text/javascript" src="./scripts/contact-service.js"></script>
-  <script type="text/javascript" src="./scripts/peer-connection.js"></script>
-  <script type="text/javascript" src="./scripts/kiosk.js"></script>
-</body>
+    <script type="text/javascript" src="./scripts/peer-connection.js"></script>
+    <script type="text/javascript" src="./scripts/kiosk.js"></script>
+  </body>
 </html>

@@ -14,12 +14,13 @@ import { styleText } from "node:util";
 // GLOBAL VARS
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-let sdpClients = [];
 dotenv.config();
+let sdpClients = [];
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const port = process.env.SERVER_PORT || 9999;
 const app = express();
+const DELETE_TIMER = process.env.DELETE_TIMER * 1000 || 20000;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // SERVE STATIC FILES IN THE PUBLIC FOLDER
@@ -40,14 +41,34 @@ app.get("/", (req, res) => {
 });
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-// GET ALL CALLERS (KIOSK AND OPERATOR)
+// AUTO DELETE INACTIVE CLIENTS
+///////////////////////////////////////////////////////////////////////////////////////////////////
+setInterval(() => {
+  const now = Date.now();
+  const before = sdpClients.length;
+  // console.log("executing cleanup script");
+
+  sdpClients = sdpClients.filter(
+    (client) => now - client.callerLastMessageOn <= DELETE_TIMER / 2
+  );
+
+  const after = sdpClients.length;
+  if (before !== after) {
+    console.log(
+      `Cleaned up ${before - after} stale clients. Remaining: ${after}`
+    );
+  }
+}, DELETE_TIMER / 2); // delete every session half life
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// GET ALL CALLERS (KIOSK AND OPERATOR) ... WITH OPTION TO FILTER BY CALLER STATUS AND CALLER TYPE
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 app.get("/callers", (req, res) => {
   const { callerStatus, callerType } = req.query;
 
   console.log(
     styleText(
-      "cyan",
+      "blue",
       `GET ALL CALLERS: ===> ` +
         `callerStatus : ${callerStatus || "filter Not provided"}` +
         ` , callerType : ${callerType || "filter Not provided"}`
@@ -63,7 +84,7 @@ app.get("/callers", (req, res) => {
 
       console.log(
         styleText(
-          "green",
+          "cyan",
           `GET ALL CALLERS: ===> with callerType ${callerType} , total: ${filteredSdpClients.length}`
         )
       );
@@ -76,7 +97,7 @@ app.get("/callers", (req, res) => {
 
       console.log(
         styleText(
-          "green",
+          "cyan",
           `GET ALL CALLERS: ===> with callerStatus ${callerStatus} , total: ${filteredSdpClients.length}`
         )
       );
@@ -87,7 +108,7 @@ app.get("/callers", (req, res) => {
       .json({ totalClients: filteredSdpClients.length, filteredSdpClients });
   } else {
     console.log(
-      styleText("green", `GET ALL CALLERS: ===> ${filteredSdpClients.length}`)
+      styleText("cyan", `GET ALL CALLERS: ===> ${filteredSdpClients.length}`)
     );
 
     res.status(200).json({
@@ -100,12 +121,12 @@ app.get("/callers", (req, res) => {
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // SIGN IN CALLERS (KIOSK AND OPERATOR)
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-app.get("/signin", (req, res) => {
+app.get("/sign-in", (req, res) => {
   const { callerType, callerName } = req.query;
 
   console.log(
     styleText(
-      "cyan",
+      "blue",
       `SIGN IN REQUEST: ===> ` +
         `callerType: ${callerType || "Not provided"} , ` +
         `callerName: ${callerName || "Not provided"}`
@@ -117,7 +138,8 @@ app.get("/signin", (req, res) => {
     callerName &&
     (callerType === "kiosk" || callerType === "operator")
   ) {
-    const currentMilliseconds = Date.now();
+    let currentMilliseconds = Date.now();
+    currentMilliseconds = currentMilliseconds + DELETE_TIMER;
 
     sdpClients.push({
       callerId: currentMilliseconds,
@@ -130,7 +152,7 @@ app.get("/signin", (req, res) => {
 
     console.log(
       styleText(
-        "green",
+        "cyan",
         `SIGN IN RESPONSE ===> callerId: ${currentMilliseconds} was assigned to ${callerType}:${callerName}`
       )
     );
@@ -153,13 +175,62 @@ app.get("/signin", (req, res) => {
 });
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
+// MAINTAIN CALLERS SESSION
+///////////////////////////////////////////////////////////////////////////////////////////////////
+app.get("/keep-session", (req, res) => {
+  const { callerId } = req.query;
+
+  console.log(
+    styleText(
+      "blue",
+      `KEEP SESSION REQUEST: ===> ` + `callerId: ${callerId || "Not provided"}`
+    )
+  );
+
+  const foundIndex = sdpClients.findIndex((sdpClient) => {
+    return String(sdpClient.callerId) === String(callerId);
+  });
+
+  if (callerId && foundIndex !== -1) {
+    const timer = Date.now() + DELETE_TIMER;
+    sdpClients[foundIndex].callerLastMessageOn = timer;
+    console.log(
+      styleText(
+        "cyan",
+        `KEEP SESSION RESPONSE ===> callerId: ${callerId}  session was extended to ${timer}`
+      )
+    );
+
+    res.status(200).json(sdpClients[foundIndex]);
+  } else if (!callerId) {
+    console.log(
+      styleText(
+        "red",
+        `KEEP SESSION RESPONSE ===> app was expecting parametere callerId but instead got ${req.query}`
+      )
+    );
+    res.status(400).json({ message: `parameter callerId Not found` });
+  } else {
+    // no match
+    console.log(
+      styleText(
+        "red",
+        `KEEP SESSION RESPONSE ===> Client with callerId '${callerId}' not found for timestamp update.`
+      )
+    );
+
+    res.status(404).json({ callerId: callerId, message: "callerId not found" });
+  }
+});
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 // SIGN OUT CALLERS (KIOSK AND OPERATOR)
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-app.get("/signout", (req, res) => {
+app.get("/sign-out", (req, res) => {
   const { callerId } = req.query;
   console.log(
     styleText(
-      "cyan",
+      "blue",
       `SIGN OUT REQUEST ===> ` + `callerType: ${callerId || "Not provided"}`
     )
   );
@@ -174,6 +245,13 @@ app.get("/signout", (req, res) => {
       ...sdpClients.slice(0, foundIndex),
       ...sdpClients.slice(foundIndex + 1),
     ];
+
+    console.log(
+      styleText(
+        "cyan",
+        `SIGN OUT RESPONSE ===> callerId ${callerId} was removed `
+      )
+    );
 
     res
       .status(200)
@@ -202,5 +280,7 @@ const server = https.createServer({ key, cert }, app);
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 server.listen(port, () => {
-  console.log(`HTTPS server started on port ${port}`);
+  console.log(
+    styleText("green", ` * * * HTTPS server started on port ${port} * * *`)
+  );
 });
