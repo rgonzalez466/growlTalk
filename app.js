@@ -31,8 +31,6 @@ app.use(
   })
 );
 
-app.get("/assets/favicon.ico", (req, res) => res.status(204));
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // SET WELCOME HTML AS THE HOME PAGE
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -41,7 +39,7 @@ app.get("/", (req, res) => {
 });
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-// AUTO DELETE INACTIVE CLIENTS
+// AUTO DELETE STALE SESSIONS
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 setInterval(() => {
   const now = Date.now();
@@ -49,7 +47,7 @@ setInterval(() => {
   // console.log("executing cleanup script");
 
   sdpClients = sdpClients.filter(
-    (client) => now - client.callerLastMessageOn <= DELETE_TIMER / 2
+    (client) => now - client.callerLastMessageOn <= DELETE_TIMER / 2 // delete stale connections
   );
 
   const after = sdpClients.length;
@@ -58,7 +56,7 @@ setInterval(() => {
       `Cleaned up ${before - after} stale clients. Remaining: ${after}`
     );
   }
-}, DELETE_TIMER / 2); // delete every session half life
+}, DELETE_TIMER / 2); // check for unused session,  every session half life
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // GET ALL CALLERS (KIOSK AND OPERATOR) ... WITH OPTION TO FILTER BY CALLER STATUS AND CALLER TYPE
@@ -175,7 +173,7 @@ app.get("/sign-in", (req, res) => {
 });
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-// MAINTAIN CALLERS SESSION
+// MAINTAIN CALLERS SESSION (KIOSK AND OPERATOR)
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 app.get("/keep-session", (req, res) => {
   const { callerId } = req.query;
@@ -231,7 +229,54 @@ app.get("/sign-out", (req, res) => {
   console.log(
     styleText(
       "blue",
-      `SIGN OUT REQUEST ===> ` + `callerType: ${callerId || "Not provided"}`
+      `SIGN OUT REQUEST ===> callerType: ${callerId || "Not provided"}`
+    )
+  );
+
+  const foundIndex = sdpClients.findIndex((sdpClient) => {
+    return String(sdpClient.callerId) === String(callerId);
+  });
+
+  // delete the caller id from array
+  if (callerId && foundIndex !== -1) {
+    sdpClients = [
+      ...sdpClients.slice(0, foundIndex),
+      ...sdpClients.slice(foundIndex + 1),
+    ];
+
+    console.log(
+      styleText(
+        "cyan",
+        `SIGN OUT RESPONSE ===> callerId ${callerId} was removed `
+      )
+    );
+
+    res
+      .status(200)
+      .json({ callerId: callerId, message: "Caller Id has signed out" });
+    //caller not found exception
+  } else {
+    console.log(
+      styleText("red", `SIGN OUT RESPONSE ===> callerId ${callerId} not found `)
+    );
+
+    res
+      .status(404)
+      .json({ callerId: callerId, message: "Caller Id not found" });
+  }
+});
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// START CALL
+///////////////////////////////////////////////////////////////////////////////////////////////////
+app.get("/start-call", (req, res) => {
+  const { from, to } = req.query;
+  console.log(
+    styleText(
+      "blue",
+      `START CALL REQUEST ===> from: ${from || "Not provided"} + to: ${
+        to || "Not provided"
+      }`
     )
   );
 
