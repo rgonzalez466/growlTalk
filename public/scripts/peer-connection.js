@@ -5,6 +5,7 @@ const SCREEN_SHARE = "UScreenCapture";
 ////////////////////////////////////////////////////////////////////////////////////////
 async function listAllDevices() {
   let { audioIn, audioOut, webcam, desktopCam } = false;
+  output("===== Available Media Devices ===== ");
   try {
     const devices = await navigator.mediaDevices.enumerateDevices();
     const grouped = {
@@ -28,7 +29,6 @@ async function listAllDevices() {
       }
     }
 
-    output("===== Available Media Devices ===== ");
     output("--- Video Inputs ---");
 
     grouped.videoinput.forEach((video, index) => {
@@ -79,15 +79,65 @@ async function listAllDevices() {
   }
 }
 
-/////////////////////////////////////////////////////////////////
-// CHECK IF CLIENT HAS  AUDIO DEVICES
-/////////////////////////////////////////////////////////////////
-
-async function checkAudioDevices() {
+/////////////////////////////////////////////////////////////////////////////////////////
+//  DO A MINI VIDEO TEST AND ASK FOR BROWSER PERMISSIONS
+/////////////////////////////////////////////////////////////////////////////////////////
+async function checkVideoDevices() {
+  const header = "===== TEST FOR VIDEO DEVICES ===== ";
   try {
     // Check if MediaDevices API is available
     if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
-      output("MediaDevices API not supported - audio disabled");
+      output(header);
+      output("❌📷MediaDevices API not supported - video disabled");
+      return false;
+    }
+
+    // Check for video input devices
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const videoInputs = devices.filter(
+      (device) => device.kind === "videoinput" && device.deviceId !== "default"
+    );
+
+    if (videoInputs.length > 0) {
+      // Test actual video access
+      try {
+        const testStream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+          audio: false,
+        });
+        testStream.getTracks().forEach((track) => track.stop());
+        output(header);
+        output("✅📷 Video enabled: camera available and accessible");
+        return true;
+      } catch (videoError) {
+        output(header);
+        output(
+          `⚠️📷 Video devices found but not accessible: ${videoError.message}`
+        );
+        return false;
+      }
+    } else {
+      output(header);
+      output("❌📷 No video input devices found");
+      return false;
+    }
+  } catch (error) {
+    output(header);
+    output(`❌📷 Error checking video availability: ${error.message}`);
+    return false;
+  }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
+//  DO A MINI AUDIO IN TEST AND ASK FOR BROWSER PERMISSIONS
+/////////////////////////////////////////////////////////////////////////////////////////
+async function checkAudioDevices() {
+  const header = "===== TEST FOR AUDIO DEVICES ===== ";
+  try {
+    // Check if MediaDevices API is available
+    if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
+      output(header);
+      output("❌🎤 MediaDevices API not supported - audio disabled");
       return false;
     }
 
@@ -105,19 +155,23 @@ async function checkAudioDevices() {
           video: false,
         });
         testStream.getTracks().forEach((track) => track.stop());
+        output(header);
         output("✅🎤 Audio enabled: microphone available and accessible");
         return true;
       } catch (audioError) {
+        output(header);
         output(
           `⚠️🎤 Audio devices found but not accessible: ${audioError.message}`
         );
         return false;
       }
     } else {
+      output(header);
       output("❌🎤No audio input devices found - video only mode");
       return false;
     }
   } catch (error) {
+    output(header);
     output(`❌🎤Error checking audio availability: ${error.message}`);
     return false;
   }
@@ -129,16 +183,16 @@ async function checkAudioDevices() {
 let thisClient;
 
 (async () => {
-  thisClient = await listAllDevices();
+  if ((await checkVideoDevices()) === false) {
+    console.warn("⚠️ No video devices detected on this client.");
+    output("⚠️📷 No video devices detected on this client.");
+  }
 
-  console.log("This client device info:", thisClient);
-
-  output("===== TEST FOR AUDIO IN DEVICES ===== ");
-
-  if (thisClient.audioIn === true) {
-    checkAudioDevices();
-  } else {
+  if ((await checkAudioDevices()) === false) {
     console.warn("⚠️ No audio input (microphone) detected on this client.");
     output("⚠️🎤 No audio input (microphone) detected on this client.");
   }
+
+  thisClient = await listAllDevices();
+  console.log("This client device info:", thisClient);
 })();

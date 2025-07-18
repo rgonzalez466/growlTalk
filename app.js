@@ -9,18 +9,27 @@ import { getCurrentDateTime } from "./controllers/misc.js";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
 import { styleText } from "node:util";
+import cors from "cors";
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // GLOBAL VARS
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 dotenv.config();
+const KIOSK_USER = "kiosk";
+const OPERATOR_USER = "kiosk";
+
 let sdpClients = [];
+let operatorSSEStreams = []; // List of SSE response streams
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const port = process.env.SERVER_PORT || 9999;
 const app = express();
 const DELETE_TIMER = process.env.DELETE_TIMER * 1000 || 20000;
+
+app.use(cors());
+app.use(express.json());
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // SERVE STATIC FILES IN THE PUBLIC FOLDER
@@ -53,7 +62,10 @@ setInterval(() => {
   const after = sdpClients.length;
   if (before !== after) {
     console.log(
-      `Cleaned up ${before - after} stale clients. Remaining: ${after}`
+      styleText(
+        "magenta",
+        `Cleaned up ${before - after} stale clients. Remaining: ${after}`
+      )
     );
   }
 }, DELETE_TIMER / 2); // check for unused session,  every session half life
@@ -134,7 +146,7 @@ app.get("/sign-in", (req, res) => {
   if (
     callerType &&
     callerName &&
-    (callerType === "kiosk" || callerType === "operator")
+    (callerType === KIOSK_USER || callerType === OPERATOR_USER)
   ) {
     let currentMilliseconds = Date.now();
     currentMilliseconds = currentMilliseconds + DELETE_TIMER;
@@ -154,6 +166,10 @@ app.get("/sign-in", (req, res) => {
         `SIGN IN RESPONSE ===> callerId: ${currentMilliseconds} was assigned to ${callerType}:${callerName}`
       )
     );
+
+    if (callerType === KIOSK_USER) {
+      notifyOperatorsAboutOldestAvailableKiosk();
+    }
 
     res.status(200).json({ callerId: currentMilliseconds });
   } else {
@@ -267,52 +283,85 @@ app.get("/sign-out", (req, res) => {
 });
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-// START CALL
+// update callers status
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-app.get("/start-call", (req, res) => {
-  const { from, to } = req.query;
+app.put("/callers", (req, res) => {
+  const { caller, callee, actionType } = req.body;
+
+  if (!caller || !callee || !actionType) {
+    return res.status(400).json({ message: "Missing parameters" });
+  }
+
+  const callerClient = sdpClients.find((c) => c.callerId == caller);
+  const calleeClient = sdpClients.find((c) => c.callerId == callee);
+
+  if (!callerClient || !calleeClient) {
+    return res.status(404).json({ message: "Caller or callee not found" });
+  }
+
+  if (actionType === "answer") {
+    callerClient.callerStatus = "BUSY";
+    calleeClient.callerStatus = "BUSY";
+  } else {
+    callerClient.callerStatus = "AVAILABLE";
+    calleeClient.callerStatus = "AVAILABLE";
+  }
+
   console.log(
     styleText(
       "blue",
-      `START CALL REQUEST ===> from: ${from || "Not provided"} + to: ${
-        to || "Not provided"
-      }`
+      `CALL STATUS UPDATE: ${caller} and ${callee} => ${actionType}`
     )
   );
 
-  const foundIndex = sdpClients.findIndex((sdpClient) => {
-    return String(sdpClient.callerId) === String(callerId);
-  });
+  // Always notify operators with the new oldest kiosk
+  notifyOperatorsAboutOldestAvailableKiosk();
 
-  // delete the caller id from array
-  if (callerId && foundIndex !== -1) {
-    sdpClients = [
-      ...sdpClients.slice(0, foundIndex),
-      ...sdpClients.slice(foundIndex + 1),
-    ];
-
-    console.log(
-      styleText(
-        "cyan",
-        `SIGN OUT RESPONSE ===> callerId ${callerId} was removed `
-      )
-    );
-
-    res
-      .status(200)
-      .json({ callerId: callerId, message: "Caller Id has signed out" });
-    //caller not found exception
-  } else {
-    console.log(
-      styleText("red", `SIGN OUT RESPONSE ===> callerId ${callerId} not found `)
-    );
-
-    res
-      .status(404)
-      .json({ callerId: callerId, message: "Caller Id not found" });
-  }
+  res.status(200).json({ success: true });
 });
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// get connection events
+///////////////////////////////////////////////////////////////////////////////////////////////////
+app.get("/events", (req, res) => {
+  req.socket.setTimeout(0);
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache");
+  res.setHeader("Connection", "keep-alive");
+  res.flushHeaders();
+
+  // Add operator SSE stream
+  operatorSSEStreams.push(res);
+
+  req.on("close", () => {
+    operatorSSEStreams = operatorSSEStreams.filter((stream) => stream !== res);
+  });
+});
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// Notify all available operators about the oldest kiosk
+///////////////////////////////////////////////////////////////////////////////////////////////////
+function notifyOperatorsAboutOldestAvailableKiosk() {
+  const oldestKiosk = sdpClients
+    .filter(
+      (c) => c.callerType === KIOSK_USER && c.callerStatus === "AVAILABLE"
+    )
+    .sort(
+      (a, b) => new Date(a.callerConnectedOn) - new Date(b.callerConnectedOn)
+    )[0];
+
+  if (!oldestKiosk) return;
+
+  const data = {
+    type: "incoming-kiosk",
+    callerId: oldestKiosk.callerId,
+    callerName: oldestKiosk.callerName,
+  };
+
+  operatorSSEStreams.forEach((stream) => {
+    stream.write(`data: ${JSON.stringify(data)}\n\n`);
+  });
+}
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // LOAD TLS CERTIFICATES FOR HTTPS
 ///////////////////////////////////////////////////////////////////////////////////////////////////
