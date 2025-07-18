@@ -48,16 +48,37 @@ app.get("/", (req, res) => {
 });
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
+// GET ENV VALUES
+///////////////////////////////////////////////////////////////////////////////////////////////////
+app.get("/env", (req, res) => {
+  res.json({
+    DELETE_TIMER: process.env.DELETE_TIMER,
+  });
+});
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
 // AUTO DELETE STALE SESSIONS
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 setInterval(() => {
   const now = Date.now();
   const before = sdpClients.length;
-  // console.log("executing cleanup script");
 
-  sdpClients = sdpClients.filter(
-    (client) => now - client.callerLastMessageOn <= DELETE_TIMER / 2 // delete stale connections
-  );
+  const expiredClients = [];
+  const activeClients = [];
+
+  sdpClients.forEach((client) => {
+    if (now + DELETE_TIMER / 2 - client.callerLastMessageOn < 0) {
+      activeClients.push(client);
+    } else {
+      expiredClients.push(client);
+    }
+  });
+
+  if (expiredClients.length > 0) {
+    console.log("🗑️ Removed inactive clients:", expiredClients);
+  }
+
+  sdpClients = activeClients;
 
   const after = sdpClients.length;
   if (before !== after) {
