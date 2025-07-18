@@ -178,7 +178,10 @@ app.get("/sign-in", (req, res) => {
       callerName: callerName,
       callerStatus: "AVAILABLE",
       callerLastMessageOn: currentMilliseconds,
-      callerConnectedOn: getCurrentDateTime(),
+      callerConnectedOn: currentMilliseconds,
+      sdpOffer: null,
+      sdpAnswer: null,
+      callerConnectedSince: getCurrentDateTime(),
     });
 
     console.log(
@@ -304,59 +307,82 @@ app.get("/sign-out", (req, res) => {
 });
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-// update callers status
+// UPDATE CALLER STATUS , SDP OFFER OR SDP ANSWER
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-// app.put("/callers", (req, res) => {
-//   let supportedACtion = ["answer", "hangup"];
-//   const { caller, callee, actionType } = req.body;
+app.put("/caller", (req, res) => {
+  const { callerId, sdpOffer, sdpAnswer, status } = req.body;
 
-//   if (!caller || !callee || !actionType) {
-//     console.log(
-//       styleText(
-//         "red",
-//         `UPDATE CALLERS RESPONSE ===> Missing parameters : caller , callee or actionType `
-//       )
-//     );
-//     return res.status(400).json({ message: "Missing parameters" });
-//   }
+  if (!callerId || (!sdpOffer && !sdpAnswer && !status)) {
+    console.log(
+      styleText(
+        "red",
+        `UPDATE CALLER RESPONSE ===> Missing parameter callerId plus sdpOffer, sdpAnswer or status `
+      )
+    );
+    return res.status(400).json({
+      message: "Missing parameter callerId plus sdpOffer, sdpAnswer or status",
+    });
+  }
 
-//   const callerClient = sdpClients.find((c) => c.callerId == caller);
-//   const calleeClient = sdpClients.find((c) => c.callerId == callee);
+  const callerClient = sdpClients.find((c) => c.callerId == callerId);
 
-//   if (!callerClient || !calleeClient) {
-//     console.log(
-//       styleText(
-//         "red",
-//         `UPDATE CALLERS  RESPONSE ===> Caller or callee not found `
-//       )
-//     );
-//     return res.status(404).json({ message: "Caller or callee not found" });
-//   }
+  if (!callerClient) {
+    console.log(
+      styleText("red", `UPDATE CALLER RESPONSE ===> callerId not found `)
+    );
+    return res.status(404).json({ message: "callerId not found" });
+  }
+  // caller id is found
+  else {
+    // update the sdp offer for the kiosk
+    if (sdpOffer && callerClient.callerType == KIOSK_USER) {
+      callerClient.sdpOffer = sdpOffer;
+      sdpClients.forEach((client) => {
+        if (client.callerId === callerClient.callerId) {
+          client.sdpOffer = callerClient.sdpOffer;
+          console.log(
+            styleText(
+              "blue",
+              `UPDATE CALLER RESPONSE ===> updated sdpOffer for callerId ${callerClient.callerId}`
+            )
+          );
+        }
+      });
+    }
+    // update the sdp answer for the operator
+    else if (sdpAnswer && callerClient.callerType == OPERATOR_USER) {
+      callerClient.sdpAnswer = sdpAnswer;
+      sdpClients.forEach((client) => {
+        if (client.callerId === callerClient.callerId) {
+          client.sdpAnswer = callerClient.sdpAnswer;
+          console.log(
+            styleText(
+              "blue",
+              `UPDATE CALLER RESPONSE ===> updated sdpAnswer for callerId ${callerClient.callerId}`
+            )
+          );
+        }
+      });
+    }
+    //update kiosk or operator status
+    else {
+      callerClient.status = status;
+      sdpClients.forEach((client) => {
+        if (client.callerId === callerClient.callerId) {
+          client.status = callerClient.status;
+          console.log(
+            styleText(
+              "blue",
+              `UPDATE CALLER RESPONSE ===> updated status for callerId ${client.callerId}:${client.callerType} to ${callerClient.status}`
+            )
+          );
+        }
+      });
+    }
 
-//   if (actionType === "answer") {
-//     callerClient.callerStatus = "BUSY";
-//     calleeClient.callerStatus = "BUSY";
-//     console.log(
-//       styleText(
-//         "blue",
-//         `CALL STATUS UPDATE: ${caller} and ${callee} => ${actionType}`
-//       )
-//     );
-//     // Always notify operators with the new oldest kiosk
-//     notifyOperatorsAboutOldestAvailableKiosk();
-//     res.status(200).json({ success: true });
-//   } else if (actionType === "hangup") {
-//     callerClient.callerStatus = "AVAILABLE";
-//     calleeClient.callerStatus = "AVAILABLE";
-//     console.log(
-//       styleText(
-//         "blue",
-//         `CALL STATUS UPDATE: ${caller} and ${callee} => ${actionType}`
-//       )
-//     );
-//   } else {
-//   }
-// });
+    return res.status(200).json(callerClient);
+  }
+});
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // get connection events

@@ -50,7 +50,7 @@ function showIncomingCallPopup(id, name) {
   });
 }
 
-const evtSource = new EventSource("http://localhost:3000/events");
+const evtSource = new EventSource("https://localhost:9999/events");
 
 evtSource.onmessage = (event) => {
   const data = JSON.parse(event.data);

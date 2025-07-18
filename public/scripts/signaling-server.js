@@ -63,3 +63,33 @@ async function keepSessionAlive(callerId, callerType) {
     console.error(`❌ Error keeping session alive: ${err.message}`);
   } // add an try to to sign-in upon error
 }
+
+/////////////////////////////////////////////////////////////////
+// UPDATE SDP OFFER , SDP ANSWER OR SDP CLIENT STATUS
+/////////////////////////////////////////////////////////////////
+async function updateSdpClient(callerId, sdpOffer, sdpAnswer, status) {
+  try {
+    const payload = {};
+
+    if (callerId) payload.callerId = callerId;
+    if (sdpOffer != null) payload.sdpOffer = sdpOffer;
+    if (sdpAnswer != null) payload.sdpAnswer = sdpAnswer;
+    if (status != null) payload.status = status;
+
+    const response = await fetch("/caller", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      throw new Error(`update caller failed with status ${response.status}`);
+    }
+    output(`===== SDP Offer Sent ===== `);
+  } catch (err) {
+    output(`❌ update SDP Offer  for caller failed: ${err.message}`);
+    console.error(`❌ update SDP Offer  for caller failed: ${err.message}`);
+  }
+}
