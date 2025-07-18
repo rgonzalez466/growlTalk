@@ -68,6 +68,7 @@ evtSource.onmessage = (event) => {
 (async () => {
   const refreshTimer = (await getEnvVars().DELETE_TIMER) || 10000;
   const callerId = await signIn(UTYPE_OPERATOR, getOperatorName());
+
   if (callerId) {
     setInterval(
       () => keepSessionAlive(callerId, UTYPE_OPERATOR),
