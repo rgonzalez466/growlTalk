@@ -1,13 +1,6 @@
 "use strict";
 
-const logPanel = document.getElementById("logPanel");
-const logToggleBtn = document.getElementById("logToggleBtn");
-const hideLogBtn = document.getElementById("hideLogBtn");
-
 const UTYPE_KIOSK = "kiosk";
-
-// Global variable to store the peer connection
-let peerConnection;
 
 /////////////////////////////////////////////////////////////////
 // GIVE THE KIOSK A RANDOM NAME
@@ -74,24 +67,6 @@ async function keepSessionAlive(callerId) {
     output(`❌💓 Error keeping session alive: ${err.message}`);
     console.error(`❌ Error keeping session alive: ${err.message}`);
   } // add an try to to sign-in upon error
-}
-
-///////////////////////////////////////////////////////////////////////////
-// SHOW / HIDE STICKY NOTE WITH USERNAME
-///////////////////////////////////////////////////////////////////////////
-function showStickyNote(message) {
-  const sticky = document.getElementById("sticky-note");
-  const header = document.querySelector(".header");
-  sticky.textContent = message;
-  sticky.style.display = "block";
-  if (header) header.classList.add("with-sticky-note");
-}
-
-function hideStickyNote() {
-  const sticky = document.getElementById("sticky-note");
-  const header = document.querySelector(".header");
-  sticky.style.display = "none";
-  if (header) header.classList.remove("with-sticky-note");
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

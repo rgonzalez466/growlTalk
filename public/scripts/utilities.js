@@ -33,3 +33,44 @@ function showToast(message, type = "success") {
     toast.className = "toast";
   }, 2000);
 }
+
+///////////////////////////////////////////////////////////////////////////
+// SHOW / HIDE STICKY NOTE WITH USERNAME
+///////////////////////////////////////////////////////////////////////////
+function showStickyNote(message) {
+  const sticky = document.getElementById("sticky-note");
+  const header = document.querySelector(".header");
+  sticky.textContent = message;
+  sticky.style.display = "block";
+  if (header) header.classList.add("with-sticky-note");
+}
+
+function hideStickyNote() {
+  const sticky = document.getElementById("sticky-note");
+  const header = document.querySelector(".header");
+  sticky.style.display = "none";
+  if (header) header.classList.remove("with-sticky-note");
+}
+
+/////////////////////////////////////////////////////////////////
+// GIVE THE KIOSK A RANDOM NAME
+/////////////////////////////////////////////////////////////////
+
+function getKioskName() {
+  const bearNames = [
+    "GrizzlyBear",
+    "FormosanBear",
+    "PolarBear",
+    "Panda",
+    "BlackBear",
+    "SunBear",
+    "SpectacledBear",
+    "SlothBear",
+    "SpiritBear",
+    "MoonBear",
+  ];
+
+  const kiosk_username =
+    bearNames[Math.floor(Math.random() * bearNames.length)];
+  return kiosk_username;
+}
