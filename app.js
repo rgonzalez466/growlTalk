@@ -17,7 +17,7 @@ import cors from "cors";
 
 dotenv.config();
 const KIOSK_USER = "kiosk";
-const OPERATOR_USER = "kiosk";
+const OPERATOR_USER = "operator";
 
 let sdpClients = [];
 let operatorSSEStreams = []; // List of SSE response streams
@@ -306,40 +306,57 @@ app.get("/sign-out", (req, res) => {
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // update callers status
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-app.put("/callers", (req, res) => {
-  const { caller, callee, actionType } = req.body;
+// app.put("/callers", (req, res) => {
+//   let supportedACtion = ["answer", "hangup"];
+//   const { caller, callee, actionType } = req.body;
 
-  if (!caller || !callee || !actionType) {
-    return res.status(400).json({ message: "Missing parameters" });
-  }
+//   if (!caller || !callee || !actionType) {
+//     console.log(
+//       styleText(
+//         "red",
+//         `UPDATE CALLERS RESPONSE ===> Missing parameters : caller , callee or actionType `
+//       )
+//     );
+//     return res.status(400).json({ message: "Missing parameters" });
+//   }
 
-  const callerClient = sdpClients.find((c) => c.callerId == caller);
-  const calleeClient = sdpClients.find((c) => c.callerId == callee);
+//   const callerClient = sdpClients.find((c) => c.callerId == caller);
+//   const calleeClient = sdpClients.find((c) => c.callerId == callee);
 
-  if (!callerClient || !calleeClient) {
-    return res.status(404).json({ message: "Caller or callee not found" });
-  }
+//   if (!callerClient || !calleeClient) {
+//     console.log(
+//       styleText(
+//         "red",
+//         `UPDATE CALLERS  RESPONSE ===> Caller or callee not found `
+//       )
+//     );
+//     return res.status(404).json({ message: "Caller or callee not found" });
+//   }
 
-  if (actionType === "answer") {
-    callerClient.callerStatus = "BUSY";
-    calleeClient.callerStatus = "BUSY";
-  } else {
-    callerClient.callerStatus = "AVAILABLE";
-    calleeClient.callerStatus = "AVAILABLE";
-  }
-
-  console.log(
-    styleText(
-      "blue",
-      `CALL STATUS UPDATE: ${caller} and ${callee} => ${actionType}`
-    )
-  );
-
-  // Always notify operators with the new oldest kiosk
-  notifyOperatorsAboutOldestAvailableKiosk();
-
-  res.status(200).json({ success: true });
-});
+//   if (actionType === "answer") {
+//     callerClient.callerStatus = "BUSY";
+//     calleeClient.callerStatus = "BUSY";
+//     console.log(
+//       styleText(
+//         "blue",
+//         `CALL STATUS UPDATE: ${caller} and ${callee} => ${actionType}`
+//       )
+//     );
+//     // Always notify operators with the new oldest kiosk
+//     notifyOperatorsAboutOldestAvailableKiosk();
+//     res.status(200).json({ success: true });
+//   } else if (actionType === "hangup") {
+//     callerClient.callerStatus = "AVAILABLE";
+//     calleeClient.callerStatus = "AVAILABLE";
+//     console.log(
+//       styleText(
+//         "blue",
+//         `CALL STATUS UPDATE: ${caller} and ${callee} => ${actionType}`
+//       )
+//     );
+//   } else {
+//   }
+// });
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // get connection events

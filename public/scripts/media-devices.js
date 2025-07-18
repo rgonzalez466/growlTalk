@@ -180,7 +180,7 @@ async function checkAudioDevices() {
 ////////////////////////////////////////////////////////////////////////////////////////
 // ON LOAD
 ////////////////////////////////////////////////////////////////////////////////////////
-let thisClient;
+let thisClientMedia;
 
 (async () => {
   if ((await checkVideoDevices()) === false) {
@@ -193,6 +193,6 @@ let thisClient;
     output("⚠️🎤 No audio input (microphone) detected on this client.");
   }
 
-  thisClient = await listAllDevices();
-  console.log("This client device info:", thisClient);
+  thisClientMedia = await listAllDevices();
+  console.log("thisClientMedia:", thisClientMedia);
 })();

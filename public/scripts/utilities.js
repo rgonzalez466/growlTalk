@@ -53,7 +53,7 @@ function hideStickyNote() {
 }
 
 /////////////////////////////////////////////////////////////////
-// GIVE THE KIOSK A RANDOM NAME
+// GIVE THE KIOSK A RANDOM BEAR NAME
 /////////////////////////////////////////////////////////////////
 
 function getKioskName() {
@@ -73,4 +73,23 @@ function getKioskName() {
   const kiosk_username =
     bearNames[Math.floor(Math.random() * bearNames.length)];
   return kiosk_username;
+}
+
+/////////////////////////////////////////////////////////////////
+// GIVE THE OPERATOR A RANDOM BEAR NAME
+/////////////////////////////////////////////////////////////////
+function getOperatorName() {
+  const bearNames = [
+    "Teddy",
+    "Baloo",
+    "Grizz",
+    "Bjorn",
+    "Misha",
+    "Nanuk",
+    "Yogi",
+  ];
+
+  const operator_username =
+    bearNames[Math.floor(Math.random() * bearNames.length)];
+  return operator_username;
 }

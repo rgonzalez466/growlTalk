@@ -2,16 +2,17 @@
 // GET ENV VALUES
 /////////////////////////////////////////////////////////////////
 async function getEnvVars() {
-  output("===== RETRIEVING ENV VARS ===== ");
   try {
     const response = await fetch(`/env`);
     if (!response.ok) {
       throw new Error(`Failed to get env vars ${response.status}`);
     }
     const data = await response.json();
+    output("===== RETRIEVING ENV VARS ===== ");
     output(`🟢 Retrieved Env Vars`);
     return data;
   } catch (err) {
+    output("===== RETRIEVING ENV VARS ===== ");
     output(`❌ Error failed to get env vars: ${err.message}`);
     console.error(`❌ Error failed to get env vars: ${err.message}`);
     return null;
@@ -22,7 +23,6 @@ async function getEnvVars() {
 // CONNECT TO SIGNALING SERVER
 /////////////////////////////////////////////////////////////////
 async function signIn(callerType, callerName) {
-  output("===== CONNECT TO SIGNALING SERVER ===== ");
   try {
     const response = await fetch(
       `/sign-in?callerType=${callerType}&callerName=${encodeURIComponent(
@@ -33,11 +33,13 @@ async function signIn(callerType, callerName) {
       throw new Error(`Sign-in failed with status ${response.status}`);
     }
     const data = await response.json();
+    output("===== CONNECT TO SIGNALING SERVER ===== ");
     output(
       `🟢 Signed in as ${callerType}:${callerName}, callerId: ${data.callerId}`
     );
     return data.callerId;
   } catch (err) {
+    output("===== CONNECT TO SIGNALING SERVER ===== ");
     output(`❌ Error during sign-in: ${err.message}`);
     console.error(`❌ Error during sign-in: ${err.message}`);
     return null;
@@ -47,7 +49,7 @@ async function signIn(callerType, callerName) {
 /////////////////////////////////////////////////////////////////
 // REFRESH SIGNALING SERVER SESSION
 /////////////////////////////////////////////////////////////////
-async function keepSessionAlive(callerId) {
+async function keepSessionAlive(callerId, callerType) {
   try {
     const response = await fetch(`/keep-session?callerId=${callerId}`);
     if (!response.ok) {

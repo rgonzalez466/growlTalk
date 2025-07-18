@@ -1,58 +1,21 @@
 "use strict";
 
-const bearNames = [
-  "Teddy",
-  "Baloo",
-  "Grizz",
-  "Bjorn",
-  "Misha",
-  "Nanuk",
-  "Yogi",
-];
+const UTYPE_OPERATOR = "operator";
 
-const bear = bearNames[Math.floor(Math.random() * bearNames.length)];
-const username = `!${bear}-operator`;
+/////////////////////////////////////////////////////////////////
+// GET KIOSK CALL EVENTS
+/////////////////////////////////////////////////////////////////
+// const evtSource = new EventSource("https://192.168.1.184:9999/events");
 
-localStorage.setItem("growltalk_name", username);
-
-const logPanel = document.getElementById("logPanel");
-const logToggleBtn = document.getElementById("logToggleBtn");
-const hideLogBtn = document.getElementById("hideLogBtn");
-
-logToggleBtn.addEventListener("click", () => {
-  logPanel.classList.add("show");
-});
-
-hideLogBtn.addEventListener("click", () => {
-  logPanel.classList.remove("show");
-});
-
-function output(message) {
-  const c = document.getElementById("console");
-
-  c.value += message;
-  c.value += "\n";
-  c.scrollTop = c.scrollHeight;
-}
-
-///////////////////////////////////////////////////////////////////////////
-// SHOW / HIDE STICKY NOTE WITH USERNAME
-///////////////////////////////////////////////////////////////////////////
-function showStickyNote(message) {
-  const sticky = document.getElementById("sticky-note");
-  const header = document.querySelector(".header");
-  sticky.textContent = message;
-  sticky.style.display = "block";
-
-  if (header) header.classList.add("with-sticky-note");
-}
-
-function hideStickyNote() {
-  const sticky = document.getElementById("sticky-note");
-  const header = document.querySelector(".header");
-  sticky.style.display = "none";
-  if (header) header.classList.remove("with-sticky-note");
-}
+// evtSource.onmessage = (event) => {
+//   const data = JSON.parse(event.data);
+//   if (data.type === "incoming-kiosk") {
+//     showIncomingCallPopup(data.callerId, data.callerName).then(() => {
+//       console.log("Call answered.");
+//       // Optionally send update to server here
+//     });
+//   }
+// };
 
 /////////////////////////////////////////////////////////////////////////////////
 // SHOW INCOMING CALL TO OPERATOR
@@ -86,3 +49,29 @@ function showIncomingCallPopup(id, name) {
     };
   });
 }
+
+const evtSource = new EventSource("http://localhost:3000/events");
+
+evtSource.onmessage = (event) => {
+  const data = JSON.parse(event.data);
+  if (data.type === "incoming-kiosk") {
+    showIncomingCallPopup(data.callerId, data.callerName).then(() => {
+      console.log("Call answered.");
+      // Optionally send update to server here
+    });
+  }
+};
+
+////////////////////////////////////////////////////////////////////////////////////////
+// ON LOAD
+////////////////////////////////////////////////////////////////////////////////////////
+(async () => {
+  const refreshTimer = (await getEnvVars().DELETE_TIMER) || 10000;
+  const callerId = await signIn(UTYPE_OPERATOR, getOperatorName());
+  if (callerId) {
+    setInterval(
+      () => keepSessionAlive(callerId, UTYPE_OPERATOR),
+      refreshTimer / 2
+    ); // call every half life
+  }
+})();

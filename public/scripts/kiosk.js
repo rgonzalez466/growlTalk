@@ -9,8 +9,9 @@ const UTYPE_KIOSK = "kiosk";
   const refreshTimer = (await getEnvVars().DELETE_TIMER) || 10000;
   const callerId = await signIn(UTYPE_KIOSK, getKioskName());
   if (callerId) {
-    setInterval(() => keepSessionAlive(callerId), refreshTimer / 2); // call every 10s
+    setInterval(
+      () => keepSessionAlive(callerId, UTYPE_KIOSK),
+      refreshTimer / 2
+    ); // call every half life
   }
 })();
-
-//checkDevices();
