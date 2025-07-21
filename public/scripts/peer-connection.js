@@ -286,30 +286,25 @@ async function generateSdpOffer() {
   }
 }
 
-////////////////////////////////////////////////////////////////////////////////////////
-// ON LOAD
-////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////
+//  GENERATE SDP ANSWER
+/////////////////////////////////////////////////////////////////////////////////////////
+async function generateSdpAnswer() {
+  if (!peerConnection) {
+    console.error("❌ PeerConnection not initialized.");
+    return null;
+  }
 
-// (async () => {
-//   let sdpClientMedia;
-//   if ((await checkVideoDevices()) === false) {
-//     console.warn("⚠️ No video devices detected on this client.");
-//     output("⚠️📷 No video devices detected on this client.");
-//   }
-
-//   if ((await checkAudioDevices()) === false) {
-//     console.warn("⚠️ No audio input (microphone) detected on this client.");
-//     output("⚠️🎤 No audio input (microphone) detected on this client.");
-//   }
-
-//   sdpClientMedia = await listAllDevices();
-//   console.log("sdpClientMedia:", sdpClientMedia);
-
-//   await initializePeerConnection(sdpClientMedia);
-
-//   const offer = await generateSdpOffer();
-//   if (offer) {
-//     // send offer.sdp to the server or signaling channel
-//     console.log("👉 Send this SDP to server:", offer.sdp);
-//   }
-// })();
+  try {
+    const answer = await peerConnection.createAnswer();
+    await peerConnection.setLocalDescription(answer);
+    output("===== SDP Answer Created =====");
+    console.log("✅ SDP answer created:");
+    output(answer.sdp);
+    console.log("👉 Send this SDP to signalling server:", answer.sdp);
+    return answer;
+  } catch (err) {
+    console.error("❌ Failed to create SDP answer:", err);
+    return null;
+  }
+}

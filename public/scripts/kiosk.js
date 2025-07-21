@@ -7,6 +7,8 @@ const UTYPE_KIOSK = "kiosk";
 ////////////////////////////////////////////////////////////////////////////////////////
 (async () => {
   let sdpClientMedia;
+  const refreshTimer = (await getEnvVars().DELETE_TIMER) || 15000;
+
   if ((await checkVideoDevices()) === false) {
     console.warn("⚠️ No video devices detected on this client.");
     output("⚠️📷 No video devices detected on this client.");
@@ -27,14 +29,14 @@ const UTYPE_KIOSK = "kiosk";
   if (offer) {
     // send offer.sdp to the server or signaling channel
     console.log("👉 Send this SDP to server:", offer.sdp);
-    const refreshTimer = (await getEnvVars().DELETE_TIMER) || 10000;
+    //console.log(refreshTimer);
     const callerId = await signIn(UTYPE_KIOSK, getKioskName());
-    const sendSdp = await updateSdpClient(callerId, offer.sdp, null, null);
+    const sendSdpOffer = await updateSdpClient(callerId, offer.sdp, null, null);
     if (callerId) {
       setInterval(
         () => keepSessionAlive(callerId, UTYPE_KIOSK),
         refreshTimer / 2
       ); // call every half life
     }
-  }
+  } //add a retry mechanism if session fails
 })();

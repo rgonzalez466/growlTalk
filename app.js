@@ -20,7 +20,7 @@ const KIOSK_USER = "kiosk";
 const OPERATOR_USER = "operator";
 
 let sdpClients = [];
-let operatorSSEStreams = []; // List of SSE response streams
+//let operatorSSEStreams = []; // List of SSE response streams
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -95,58 +95,45 @@ setInterval(() => {
 // GET ALL CALLERS (KIOSK AND OPERATOR) ... WITH OPTION TO FILTER BY CALLER STATUS AND CALLER TYPE
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 app.get("/callers", (req, res) => {
-  const { callerStatus, callerType } = req.query;
+  const { callerStatus, callerType, limit, wait } = req.query;
 
   console.log(
     styleText(
       "blue",
       `GET ALL CALLERS: ===> ` +
         `callerStatus : ${callerStatus || "filter Not provided"}` +
-        ` , callerType : ${callerType || "filter Not provided"}`
+        ` , callerType : ${callerType || "filter Not provided"}` +
+        ` , limit : ${limit || "filter Not provided"}`
     )
   );
 
-  let filteredSdpClients = sdpClients;
-  if (callerStatus || callerType) {
-    if (callerType) {
-      filteredSdpClients = filteredSdpClients.filter(
-        (sdpClient) => sdpClient.callerType === callerType
-      );
+  const matchClients = () => {
+    let filtered = sdpClients;
 
-      console.log(
-        styleText(
-          "cyan",
-          `GET ALL CALLERS: ===> with callerType ${callerType} , total: ${filteredSdpClients.length}`
-        )
-      );
+    if (callerType) {
+      filtered = filtered.filter((c) => c.callerType === callerType);
     }
 
     if (callerStatus) {
-      filteredSdpClients = filteredSdpClients.filter(
-        (sdpClient) => sdpClient.callerStatus === callerStatus
-      );
-
-      console.log(
-        styleText(
-          "cyan",
-          `GET ALL CALLERS: ===> with callerStatus ${callerStatus} , total: ${filteredSdpClients.length}`
-        )
-      );
+      filtered = filtered.filter((c) => c.callerStatus === callerStatus);
     }
 
-    res
-      .status(200)
-      .json({ totalClients: filteredSdpClients.length, filteredSdpClients });
-  } else {
-    console.log(
-      styleText("cyan", `GET ALL CALLERS: ===> ${filteredSdpClients.length}`)
+    // Sort by `callerConnectedOn` ascending (oldest first)
+    filtered.sort(
+      (a, b) => new Date(a.callerConnectedOn) - new Date(b.callerConnectedOn)
     );
 
-    res.status(200).json({
-      totalClients: filteredSdpClients.length,
-      filteredSdpClients,
-    });
-  }
+    // Apply limit if provided
+    const limited = limit ? filtered.slice(0, parseInt(limit)) : filtered;
+
+    return limited;
+  };
+
+  const matchingClients = matchClients();
+  return res.status(200).json({
+    totalClients: matchingClients.length,
+    filteredSdpClients: matchingClients,
+  });
 });
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -190,10 +177,6 @@ app.get("/sign-in", (req, res) => {
         `SIGN IN RESPONSE ===> callerId: ${currentMilliseconds} was assigned to ${callerType}:${callerName}`
       )
     );
-
-    if (callerType === KIOSK_USER) {
-      notifyOperatorsAboutOldestAvailableKiosk();
-    }
 
     res.status(200).json({ callerId: currentMilliseconds });
   } else {
@@ -384,48 +367,6 @@ app.put("/caller", (req, res) => {
   }
 });
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
-// get connection events
-///////////////////////////////////////////////////////////////////////////////////////////////////
-app.get("/events", (req, res) => {
-  req.socket.setTimeout(0);
-  res.setHeader("Content-Type", "text/event-stream");
-  res.setHeader("Cache-Control", "no-cache");
-  res.setHeader("Connection", "keep-alive");
-  res.flushHeaders();
-
-  // Add operator SSE stream
-  operatorSSEStreams.push(res);
-
-  req.on("close", () => {
-    operatorSSEStreams = operatorSSEStreams.filter((stream) => stream !== res);
-  });
-});
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-// Notify all available operators about the oldest kiosk
-///////////////////////////////////////////////////////////////////////////////////////////////////
-function notifyOperatorsAboutOldestAvailableKiosk() {
-  const oldestKiosk = sdpClients
-    .filter(
-      (c) => c.callerType === KIOSK_USER && c.callerStatus === "AVAILABLE"
-    )
-    .sort(
-      (a, b) => new Date(a.callerConnectedOn) - new Date(b.callerConnectedOn)
-    )[0];
-
-  if (!oldestKiosk) return;
-
-  const data = {
-    type: "incoming-kiosk",
-    callerId: oldestKiosk.callerId,
-    callerName: oldestKiosk.callerName,
-  };
-
-  operatorSSEStreams.forEach((stream) => {
-    stream.write(`data: ${JSON.stringify(data)}\n\n`);
-  });
-}
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // LOAD TLS CERTIFICATES FOR HTTPS
 ///////////////////////////////////////////////////////////////////////////////////////////////////

@@ -1,3 +1,6 @@
+const KIOSK_USER = "kiosk";
+const OPERATOR_USER = "operator";
+
 /////////////////////////////////////////////////////////////////
 // GET ENV VALUES
 /////////////////////////////////////////////////////////////////
@@ -61,9 +64,8 @@ async function keepSessionAlive(callerId, callerType) {
   } catch (err) {
     output(`❌💓 Error keeping session alive: ${err.message}`);
     console.error(`❌ Error keeping session alive: ${err.message}`);
-  } // add an try to to sign-in upon error
+  }
 }
-
 /////////////////////////////////////////////////////////////////
 // UPDATE SDP OFFER , SDP ANSWER OR SDP CLIENT STATUS
 /////////////////////////////////////////////////////////////////
@@ -90,6 +92,6 @@ async function updateSdpClient(callerId, sdpOffer, sdpAnswer, status) {
     output(`===== SDP Offer Sent ===== `);
   } catch (err) {
     output(`❌ update SDP Offer  for caller failed: ${err.message}`);
-    console.error(`❌ update SDP Offer  for caller failed: ${err.message}`);
+    console.error(`❌ update SDP Offer for caller failed: ${err.message}`);
   }
 }

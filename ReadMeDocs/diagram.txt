@@ -1,0 +1,25 @@
+ Kiosk                        Signaling Server                      Concierge
+--------                        ----------------                    --------
+   |                                  |<-------GET sign-in?-------------|
+   |                                  |     (callerType=operator)       |
+   |                                  |                                 |                      
+   |                                  |<------GET callers---------------|
+   |                                  |     (callerType=kiosk,          |
+   |                                  |      status=available,          |
+   |                                  |      limit=1)                   | 
+   |----GET sign-in?----------------->|                                 |
+   |     (callerType=kiosk)           |                                 |
+   |                                  |                                 |
+   |                                  |                                 |
+   |-- createOffer() ---------------->|                                 |
+   |   (SDP Offer)                    |-- send offer ------------------>|
+   |                                  |                                 |
+   |                                  |<-- send answer -----------------|
+   |<---------------- setRemoteAnswer()                                 |
+   |                                  |                                 |
+   |-- addIceCandidate() ------------>|                                 |
+   |                                  |-- send candidate -------------> |
+   |                                  |<-- send candidate ------------- |
+   |<---------------- addIceCandidate()                                 |
+   |                                  |                                 |
+[ WebRTC P2P Connection established between Client A <--> Client B ] 

@@ -50,29 +50,43 @@ function showIncomingCallPopup(id, name) {
   });
 }
 
-const evtSource = new EventSource("https://localhost:9999/events");
-
-evtSource.onmessage = (event) => {
-  const data = JSON.parse(event.data);
-  if (data.type === "incoming-kiosk") {
-    showIncomingCallPopup(data.callerId, data.callerName).then(() => {
-      console.log("Call answered.");
-      // Optionally send update to server here
-    });
-  }
-};
-
 ////////////////////////////////////////////////////////////////////////////////////////
 // ON LOAD
 ////////////////////////////////////////////////////////////////////////////////////////
 (async () => {
-  const refreshTimer = (await getEnvVars().DELETE_TIMER) || 10000;
-  const callerId = await signIn(UTYPE_OPERATOR, getOperatorName());
+  let sdpClientMedia;
+  if ((await checkVideoDevices()) === false) {
+    console.warn("⚠️ No video devices detected on this client.");
+    output("⚠️📷 No video devices detected on this client.");
+  }
 
-  if (callerId) {
-    setInterval(
-      () => keepSessionAlive(callerId, UTYPE_OPERATOR),
-      refreshTimer / 2
-    ); // call every half life
+  if ((await checkAudioDevices()) === false) {
+    console.warn("⚠️ No audio input (microphone) detected on this client.");
+    output("⚠️🎤 No audio input (microphone) detected on this client.");
+  }
+
+  sdpClientMedia = await listAllDevices();
+  console.log("sdpClientMedia:", sdpClientMedia);
+
+  await initializePeerConnection(sdpClientMedia);
+
+  const offer = await generateSdpOffer();
+  if (offer) {
+    // send offer.sdp to the server or signaling channel
+    //console.log("👉 Send this SDP to server:", offer.sdp);
+    const refreshTimer = (await getEnvVars().DELETE_TIMER) || 10000;
+    const callerId = await signIn(UTYPE_OPERATOR, getKioskName());
+    const sendSdpAnswer = await updateSdpClient(
+      callerId,
+      offer.sdp,
+      null,
+      null
+    );
+    if (callerId) {
+      setInterval(
+        () => keepSessionAlive(callerId, UTYPE_OPERATOR),
+        refreshTimer / 2
+      ); // call every half life
+    }
   }
 })();
