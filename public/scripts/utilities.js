@@ -95,3 +95,35 @@ function getOperatorName() {
     bearNames[Math.floor(Math.random() * bearNames.length)];
   return operator_username;
 }
+
+/////////////////////////////////////////////////////////////////
+// LOGO HANDLER - CLICK ON LOGO TO SIGN OUT
+/////////////////////////////////////////////////////////////////
+async function handleHomeButtonClick(event) {
+  event.preventDefault(); // Prevent default link behavior
+
+  if (thisClientId) {
+    await signOut(thisClientId);
+  }
+
+  // Navigate to welcome.html after signOut completes
+  window.location.href = "welcome.html";
+}
+
+/////////////////////////////////////////////////////////////////
+// CLOSE BROWSER HANDLER -  SIGN OUT UPON BROWSER CLOSE
+/////////////////////////////////////////////////////////////////
+// Add event listener when DOM is loaded
+document.addEventListener("DOMContentLoaded", function () {
+  const homeButton = document.getElementById("homeButton");
+  if (homeButton) {
+    homeButton.addEventListener("click", handleHomeButtonClick);
+  }
+});
+
+// Handle browser window close/refresh
+window.addEventListener("beforeunload", function (event) {
+  if (thisClientId) {
+    navigator.sendBeacon(`/sign-out?callerId=${thisClientId}`);
+  }
+});

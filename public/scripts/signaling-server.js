@@ -1,6 +1,10 @@
 const KIOSK_USER = "kiosk";
 const OPERATOR_USER = "operator";
 
+let thisClientId = "";
+let thisClientName = "";
+let thisClientType = "";
+
 /////////////////////////////////////////////////////////////////
 // GET ENV VALUES
 /////////////////////////////////////////////////////////////////
@@ -36,15 +40,40 @@ async function signIn(callerType, callerName) {
       throw new Error(`Sign-in failed with status ${response.status}`);
     }
     const data = await response.json();
+
     output("===== CONNECT TO SIGNALING SERVER ===== ");
     output(
       `🟢 Signed in as ${callerType}:${callerName}, callerId: ${data.callerId}`
     );
+    thisClientName = callerName;
+    thisClientType = callerType;
+    thisClientId = data.callerId;
     return data.callerId;
   } catch (err) {
     output("===== CONNECT TO SIGNALING SERVER ===== ");
     output(`❌ Error during sign-in: ${err.message}`);
     console.error(`❌ Error during sign-in: ${err.message}`);
+    return null;
+  }
+}
+
+/////////////////////////////////////////////////////////////////
+// DISCONNECT FROM SIGNALING SERVER
+/////////////////////////////////////////////////////////////////
+async function signOut(callerId) {
+  try {
+    const response = await fetch(`/sign-out?callerId=${callerId}`);
+    if (!response.ok) {
+      throw new Error(`Sign-out failed with status ${response.status}`);
+    }
+    const data = await response.json();
+    output("===== DISCONNECT FROM SIGNALING SERVER ===== ");
+    output(`🟢 Signed out as callerId: ${data.callerId}`);
+    return data.callerId;
+  } catch (err) {
+    output("===== DISCONNECT FROM SIGNALING SERVER ===== ");
+    output(`❌ Error during sign-out: ${err.message}`);
+    console.error(`❌ Error during sign-out: ${err.message}`);
     return null;
   }
 }

@@ -100,10 +100,11 @@ app.get("/callers", (req, res) => {
   console.log(
     styleText(
       "blue",
-      `GET ALL CALLERS: ===> ` +
+      `GET CALLERS: ===> ` +
         `callerStatus : ${callerStatus || "filter Not provided"}` +
         ` , callerType : ${callerType || "filter Not provided"}` +
-        ` , limit : ${limit || "filter Not provided"}`
+        ` , limit : ${limit || "filter Not provided"}`,
+      ` , wait : ${wait || "filter Not provided"}`
     )
   );
 
@@ -118,22 +119,46 @@ app.get("/callers", (req, res) => {
       filtered = filtered.filter((c) => c.callerStatus === callerStatus);
     }
 
-    // Sort by `callerConnectedOn` ascending (oldest first)
     filtered.sort(
       (a, b) => new Date(a.callerConnectedOn) - new Date(b.callerConnectedOn)
     );
 
-    // Apply limit if provided
     const limited = limit ? filtered.slice(0, parseInt(limit)) : filtered;
 
     return limited;
   };
 
-  const matchingClients = matchClients();
-  return res.status(200).json({
-    totalClients: matchingClients.length,
-    filteredSdpClients: matchingClients,
-  });
+  const waitSeconds = Math.min(parseInt(wait) || 0, 60); // Cap wait to 60 seconds
+  let secondsWaited = 0;
+
+  const checkForClients = () => {
+    const matchingClients = matchClients();
+
+    if (matchingClients.length > 0 || secondsWaited >= waitSeconds) {
+      return res.status(200).json({
+        totalClients: matchingClients.length,
+        filteredSdpClients: matchingClients,
+      });
+    }
+
+    // Wait 1 second and retry
+    setTimeout(() => {
+      secondsWaited++;
+      checkForClients();
+    }, 1000);
+  };
+
+  // If wait is not defined or is zero, respond immediately
+  if (!waitSeconds) {
+    const matchingClients = matchClients();
+    return res.status(200).json({
+      totalClients: matchingClients.length,
+      filteredSdpClients: matchingClients,
+    });
+  }
+
+  // Otherwise, start polling
+  checkForClients();
 });
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
