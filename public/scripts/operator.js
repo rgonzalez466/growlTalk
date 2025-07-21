@@ -2,21 +2,6 @@
 
 const UTYPE_OPERATOR = "operator";
 
-/////////////////////////////////////////////////////////////////
-// GET KIOSK CALL EVENTS
-/////////////////////////////////////////////////////////////////
-// const evtSource = new EventSource("https://192.168.1.184:9999/events");
-
-// evtSource.onmessage = (event) => {
-//   const data = JSON.parse(event.data);
-//   if (data.type === "incoming-kiosk") {
-//     showIncomingCallPopup(data.callerId, data.callerName).then(() => {
-//       console.log("Call answered.");
-//       // Optionally send update to server here
-//     });
-//   }
-// };
-
 /////////////////////////////////////////////////////////////////////////////////
 // SHOW INCOMING CALL TO OPERATOR
 /////////////////////////////////////////////////////////////////////////////////

@@ -1,4 +1,4 @@
-let sdpClient; // used for storing this web client's properties
+let thisSdpClient = {}; // used for storing this web client's properties
 
 /////////////////////////////////////////////////////////////////
 // LOG VIDEO CALL SERVER EVENTS
@@ -102,8 +102,8 @@ function getOperatorName() {
 async function handleHomeButtonClick(event) {
   event.preventDefault(); // Prevent default link behavior
 
-  if (thisClientId) {
-    await signOut(thisClientId);
+  if (thisSdpClient.callerId) {
+    await signOut(thisSdpClient.callerId);
   }
 
   // Navigate to welcome.html after signOut completes
@@ -123,7 +123,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 // Handle browser window close/refresh
 window.addEventListener("beforeunload", function (event) {
-  if (thisClientId) {
-    navigator.sendBeacon(`/sign-out?callerId=${thisClientId}`);
+  if (thisSdpClient.callerId) {
+    navigator.sendBeacon(`/sign-out?callerId=${thisSdpClient.callerId}`);
   }
 });

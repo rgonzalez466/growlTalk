@@ -150,6 +150,7 @@ async function checkAudioDevices() {
       (device) => device.kind === "audioinput" && device.deviceId !== "default"
     );
 
+    thisSdpClient.audio = "NA";
     if (audioInputs.length > 0) {
       // Test actual audio access
       try {
@@ -158,6 +159,7 @@ async function checkAudioDevices() {
           video: false,
         });
         testStream.getTracks().forEach((track) => track.stop());
+        thisSdpClient.audio = audioInputs[0].label;
         output(header);
         output("✅🎤 Audio enabled: microphone available and accessible");
         return true;
@@ -194,9 +196,11 @@ async function initializePeerConnection(sdpClientMedia) {
 
   for (const device of videoInputs) {
     if (device.label === SCREEN_SHARE) {
+      thisSdpClient.desktopCam = device.label;
       screenDevice = device;
     } else {
       if (!webcamDevice) webcamDevice = device;
+      thisSdpClient.webcamDevice = device.label;
     }
   }
 

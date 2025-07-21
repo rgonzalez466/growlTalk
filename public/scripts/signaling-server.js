@@ -1,10 +1,6 @@
 const KIOSK_USER = "kiosk";
 const OPERATOR_USER = "operator";
 
-let thisClientId = "";
-let thisClientName = "";
-let thisClientType = "";
-
 /////////////////////////////////////////////////////////////////
 // GET ENV VALUES
 /////////////////////////////////////////////////////////////////
@@ -45,9 +41,13 @@ async function signIn(callerType, callerName) {
     output(
       `🟢 Signed in as ${callerType}:${callerName}, callerId: ${data.callerId}`
     );
-    thisClientName = callerName;
-    thisClientType = callerType;
-    thisClientId = data.callerId;
+
+    thisSdpClient.callerName = callerName;
+    thisSdpClient.callerType = callerType;
+    thisSdpClient.callerId = data.callerId;
+    thisSdpClient.callerStatus = "AVAILABLE";
+    thisSdpClient.isOnline = true;
+
     return data.callerId;
   } catch (err) {
     output("===== CONNECT TO SIGNALING SERVER ===== ");
@@ -69,6 +69,7 @@ async function signOut(callerId) {
     const data = await response.json();
     output("===== DISCONNECT FROM SIGNALING SERVER ===== ");
     output(`🟢 Signed out as callerId: ${data.callerId}`);
+    thisSdpClient.isOnline = false;
     return data.callerId;
   } catch (err) {
     output("===== DISCONNECT FROM SIGNALING SERVER ===== ");
@@ -87,10 +88,11 @@ async function keepSessionAlive(callerId, callerType) {
     if (!response.ok) {
       throw new Error(`Keep-alive failed with status ${response.status}`);
     }
+    thisSdpClient.isOnline = true;
     output(`===== SESSION REFRESHED: ${callerId} ===== `);
-
     //   output(`💓 Session refreshed for callerId: ${callerId}`);
   } catch (err) {
+    thisSdpClient.isOnline = false;
     output(`❌💓 Error keeping session alive: ${err.message}`);
     console.error(`❌ Error keeping session alive: ${err.message}`);
   }
@@ -118,9 +120,24 @@ async function updateSdpClient(callerId, sdpOffer, sdpAnswer, status) {
     if (!response.ok) {
       throw new Error(`update caller failed with status ${response.status}`);
     }
-    output(`===== SDP Offer Sent ===== `);
+
+    if (sdpOffer) {
+      thisSdpClient.sdpOffer = sdpOffer;
+      output(`===== SDP Offer Sent ===== `);
+    }
+
+    if (status) {
+      output(`===== UPDATED CALLER STATUS TO ${status} ===== `);
+      thisSdpClient.callerStatus = status;
+    }
   } catch (err) {
-    output(`❌ update SDP Offer  for caller failed: ${err.message}`);
-    console.error(`❌ update SDP Offer for caller failed: ${err.message}`);
+    if (sdpOffer) {
+      output(`❌ update SDP Offer  for caller failed: ${err.message}`);
+      console.error(`❌ update SDP Offer for caller failed: ${err.message}`);
+    }
+    if (status) {
+      output(`❌ update status  for caller failed: ${err.message}`);
+      console.error(`❌ update statys for caller failed: ${err.message}`);
+    }
   }
 }
