@@ -1,25 +1,58 @@
- Kiosk                        Signaling Server                      Concierge
---------                        ----------------                    --------
-   |                                  |<-------GET sign-in?-------------|
-   |                                  |     (callerType=operator)       |
-   |                                  |                                 |                      
-   |                                  |<------GET callers---------------|
-   |                                  |     (callerType=kiosk,          |
-   |                                  |      status=available,          |
-   |                                  |      limit=1)                   | 
-   |----GET sign-in?----------------->|                                 |
-   |     (callerType=kiosk)           |                                 |
-   |                                  |                                 |
-   |                                  |                                 |
-   |-- createOffer() ---------------->|                                 |
-   |   (SDP Offer)                    |-- send offer ------------------>|
-   |                                  |                                 |
-   |                                  |<-- send answer -----------------|
-   |<---------------- setRemoteAnswer()                                 |
-   |                                  |                                 |
-   |-- addIceCandidate() ------------>|                                 |
-   |                                  |-- send candidate -------------> |
-   |                                  |<-- send candidate ------------- |
-   |<---------------- addIceCandidate()                                 |
-   |                                  |                                 |
-[ WebRTC P2P Connection established between Client A <--> Client B ] 
+            ========                     ===================                   ============
+            || Kiosk||                    || Signaling Server||                 || Concierge||
+            ========                     ===================                   ============
+                |                                  |                                 |
+                |                                  |                                 |
+                |                                  |<-------GET /sign-in?------------|
+                |                                  |     (callerType=operator?       |
+                |                                  |      callerName=MrConcierge)    |
+                |                                  |                                 |     
+                |                                  |==== RETURN callerId ===========>|     
+                |                                  |                                 |  
+                |                                  |                                 |  
+                |                                  |                                 |                                              
+                |                                  |<------GET /callers--------------|<--------|Retry
+                |                                  |     (callerType=kiosk,          |         |until
+                |                                  |      status=available,          |         |success (LONG POLL)
+                |                                  |      limit=1,wait=60)           |         |
+                |                                  |                                 |         |
+                |                                  |===== RETURN callerId ==========>|---------|     
+                |                                  |                                 |     
+                |                                  |                                 |     
+                |                                  |                                 |     
+                |                                  |                                 |     
+                |                                  |<------GET /keep-session?--------|<--------|
+                |                                  |     (callerId=${operatorId})    |         |Continously 
+                |                                  |                                 |         |Retry
+                |                                  |                                 |         |
+                |                                  |=== RETURN updated exp time ====>|---------|     
+                |                                  |                                 |    
+                |                                  |                                 |    
+                |                                  |                                 |     
+                |~~~~~ GET /sign-in? ~~~~~~~~~~~~~>|                                 |
+                |     (callerType=kiosk?           |                                 |
+                |      callerName=MrKiosk)         |                                 |
+                |                                  |                                 |
+                |<===== RETURN callerId ===========|                                 |
+                |                                  |                                 |
+                |                                  |                                 |
+                |                                  |                                 |
+createOffer()   |~~~~~~~ PUT /caller~~~~~~~~~~~~~~>|                                 |
+                |   (                              |                                 |
+                |    {"callerId": ${callerId},     |                                 |
+                |    "sdpOffer" : ${sdpOffer}      |                                 | 
+                |     })                           |                                 |                    
+                
+                
+                
+                |-- send offer ------------------>|
+                |                                  |                                 |
+                |                                  |<-- send answer -----------------|
+                |<---------------- setRemoteAnswer()                                 |
+                |                                  |                                 |
+                |-- addIceCandidate() ------------>|                                 |
+                |                                  |-- send candidate -------------> |
+                |                                  |<-- send candidate ------------- |
+                |<---------------- addIceCandidate()                                 |
+                |                                  |                                 |
+            [ WebRTC P2P Connection established between Client A <--> Client B ] 

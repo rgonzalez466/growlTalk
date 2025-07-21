@@ -97,16 +97,16 @@ setInterval(() => {
 app.get("/callers", (req, res) => {
   const { callerStatus, callerType, limit, wait } = req.query;
 
-  console.log(
-    styleText(
-      "blue",
-      `GET CALLERS: ===> ` +
-        `callerStatus : ${callerStatus || "filter Not provided"}` +
-        ` , callerType : ${callerType || "filter Not provided"}` +
-        ` , limit : ${limit || "filter Not provided"}`,
-      ` , wait : ${wait || "filter Not provided"}`
-    )
-  );
+  // console.log(
+  //   styleText(
+  //     "blue",
+  //     `GET CALLERS: ===> ` +
+  //       `callerStatus : ${callerStatus || "filter Not provided"}` +
+  //       ` , callerType : ${callerType || "filter Not provided"}` +
+  //       ` , limit : ${limit || "filter Not provided"}`,
+  //     ` , wait : ${wait || "filter Not provided"}`
+  //   )
+  // );
 
   const matchClients = () => {
     let filtered = sdpClients;
@@ -167,14 +167,14 @@ app.get("/callers", (req, res) => {
 app.get("/sign-in", (req, res) => {
   const { callerType, callerName } = req.query;
 
-  console.log(
-    styleText(
-      "blue",
-      `SIGN IN REQUEST: ===> ` +
-        `callerType: ${callerType || "Not provided"} , ` +
-        `callerName: ${callerName || "Not provided"}`
-    )
-  );
+  // console.log(
+  //   styleText(
+  //     "blue",
+  //     `SIGN IN REQUEST: ===> ` +
+  //       `callerType: ${callerType || "Not provided"} , ` +
+  //       `callerName: ${callerName || "Not provided"}`
+  //   )
+  // );
 
   if (
     callerType &&
@@ -196,12 +196,15 @@ app.get("/sign-in", (req, res) => {
       callerConnectedSince: getCurrentDateTime(),
     });
 
-    console.log(
-      styleText(
-        "cyan",
-        `SIGN IN RESPONSE ===> callerId: ${currentMilliseconds} was assigned to ${callerType}:${callerName}`
-      )
-    );
+    // console.log(
+    //   styleText(
+    //     "cyan",
+    //     `SIGN IN RESPONSE ===> callerId: ${currentMilliseconds} was assigned to ${callerType}:${callerName}`
+    //   )
+    // );
+
+    // console.log(sdpClients);
+    // console.log("=====================================");
 
     res.status(200).json({ callerId: currentMilliseconds });
   } else {
@@ -226,12 +229,12 @@ app.get("/sign-in", (req, res) => {
 app.get("/keep-session", (req, res) => {
   const { callerId } = req.query;
 
-  console.log(
-    styleText(
-      "blue",
-      `KEEP SESSION REQUEST: ===> ` + `callerId: ${callerId || "Not provided"}`
-    )
-  );
+  // console.log(
+  //   styleText(
+  //     "blue",
+  //     `KEEP SESSION REQUEST: ===> ` + `callerId: ${callerId || "Not provided"}`
+  //   )
+  // );
 
   const foundIndex = sdpClients.findIndex((sdpClient) => {
     return String(sdpClient.callerId) === String(callerId);
@@ -240,12 +243,13 @@ app.get("/keep-session", (req, res) => {
   if (callerId && foundIndex !== -1) {
     const timer = Date.now() + DELETE_TIMER;
     sdpClients[foundIndex].callerLastMessageOn = timer;
-    console.log(
-      styleText(
-        "cyan",
-        `KEEP SESSION RESPONSE ===> callerId: ${callerId}  session was extended to ${timer}`
-      )
-    );
+
+    // console.log(
+    //   styleText(
+    //     "cyan",
+    //     `KEEP SESSION RESPONSE ===> callerId: ${callerId}  session was extended to ${timer}`
+    //   )
+    // );
 
     res.status(200).json(sdpClients[foundIndex]);
   } else if (!callerId) {
@@ -374,20 +378,20 @@ app.put("/caller", (req, res) => {
     }
     //update kiosk or operator status
     else {
-      callerClient.status = status;
+      callerClient.callerStatus = status;
       sdpClients.forEach((client) => {
         if (client.callerId === callerClient.callerId) {
-          client.status = callerClient.status;
+          client.callerStatus = callerClient.callerStatus;
           console.log(
             styleText(
               "blue",
-              `UPDATE CALLER RESPONSE ===> updated status for callerId ${client.callerId}:${client.callerType} to ${callerClient.status}`
+              `UPDATE CALLER RESPONSE ===> updated status for callerId ${client.callerId}:${client.callerType} to ${callerClient.callerStatus}`
             )
           );
         }
       });
     }
-
+    //  console.log(sdpClients);
     return res.status(200).json(callerClient);
   }
 });
