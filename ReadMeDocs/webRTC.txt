@@ -1,4 +1,4 @@
-Client A                        Signaling Server                    Client B
+Kiosk                           Signaling Server                    Operator
 --------                        ----------------                    --------
    |                                  |                                 |
    |-- createOffer() ---------------->|                                 |
@@ -12,4 +12,4 @@ Client A                        Signaling Server                    Client B
    |                                  |<-- send candidate ------------- |
    |<---------------- addIceCandidate()                                 |
    |                                  |                                 |
-[ WebRTC P2P Connection established between Client A <--> Client B ] 
+    [ WebRTC P2P Connection established between Client A <--> Client B ] 

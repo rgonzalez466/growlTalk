@@ -268,7 +268,7 @@ async function initializePeerConnection(sdpClientMedia) {
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
-//  GENERATE SDP OFFER
+//  GENERATE SDP OFFER (KIOSK)
 /////////////////////////////////////////////////////////////////////////////////////////
 async function generateSdpOffer() {
   if (!peerConnection) {
@@ -291,7 +291,7 @@ async function generateSdpOffer() {
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
-//  GENERATE SDP ANSWER
+//  GENERATE SDP ANSWER (OPERATOR)
 /////////////////////////////////////////////////////////////////////////////////////////
 async function generateSdpAnswer(remoteSdpOffer) {
   if (!peerConnection || !remoteSdpOffer) {
@@ -315,5 +315,22 @@ async function generateSdpAnswer(remoteSdpOffer) {
   } catch (err) {
     console.error("❌ Failed to create SDP answer:", err);
     return null;
+  }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
+//  APPLY SDP ANSWER (KIOSK)
+/////////////////////////////////////////////////////////////////////////////////////////
+async function applyRemoteSdpAnswer(answerSdp) {
+  try {
+    const answerDesc = new RTCSessionDescription({
+      type: "answer",
+      sdp: answerSdp,
+    });
+
+    await peerConnection.setRemoteDescription(answerDesc);
+    output("✅ Remote SDP Answer applied.");
+  } catch (err) {
+    console.error("❌ Failed to apply remote SDP answer:", err);
   }
 }

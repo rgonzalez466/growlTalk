@@ -2,3 +2,5 @@
 - if the server is restarted , the web client should reconnect (bug)
 - after a while , the client will disconnect (bug)
 - add try catch to get all exceptions (bug)
+- implement ice candidates ... use the /callers endpoint 
+- when refresh or close windows ... should log out kiosk (kiosk)
