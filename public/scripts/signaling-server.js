@@ -121,14 +121,14 @@ async function keepSessionAlive(callerId, callerType) {
 /////////////////////////////////////////////////////////////////
 // UPDATE SDP OFFER , SDP ANSWER OR SDP CLIENT STATUS
 /////////////////////////////////////////////////////////////////
-async function updateSdpClient(callerId, sdpOffer, sdpAnswer, status) {
+async function updateSdpClient(callerId, sdpOffer, sdpAnswer, callerStatus) {
   try {
     const payload = {};
 
     if (callerId) payload.callerId = callerId;
     if (sdpOffer != null) payload.sdpOffer = sdpOffer;
     if (sdpAnswer != null) payload.sdpAnswer = sdpAnswer;
-    if (status != null) payload.status = status;
+    if (callerStatus != null) payload.callerStatus = callerStatus;
 
     const response = await fetch("/caller", {
       method: "PUT",
@@ -143,20 +143,20 @@ async function updateSdpClient(callerId, sdpOffer, sdpAnswer, status) {
     }
 
     if (sdpOffer) {
-      thisSdpClient.sdpOffer = sdpOffer;
+      thisSdpClient.mySdpOffer = sdpOffer;
       output(`===== SDP Offer Sent ===== `);
     }
 
-    if (status) {
-      output(`===== UPDATED CALLER STATUS TO ${status} ===== `);
-      thisSdpClient.callerStatus = status;
+    if (callerStatus) {
+      output(`===== UPDATED CALLER STATUS TO ${callerStatus} ===== `);
+      thisSdpClient.callerStatus = callerStatus;
     }
   } catch (err) {
     if (sdpOffer) {
       output(`❌ update SDP Offer  for caller failed: ${err.message}`);
       console.error(`❌ update SDP Offer for caller failed: ${err.message}`);
     }
-    if (status) {
+    if (callerStatus) {
       output(`❌ update status  for caller failed: ${err.message}`);
       console.error(`❌ update statys for caller failed: ${err.message}`);
     }

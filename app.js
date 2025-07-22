@@ -92,10 +92,10 @@ setInterval(() => {
 }, DELETE_TIMER / 2); // check for unused session,  every session half life
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-// GET ALL CALLERS (KIOSK AND OPERATOR) ... WITH OPTION TO FILTER BY CALLER STATUS AND CALLER TYPE
+// GET ALL CALLERS (KIOSK AND OPERATOR) ... WITH OPTION TO FILTER BY CALLER STATUS , CALLER TYPE, CALLER ID ,MAX RESULTS (LIMIT) AND LONG POLL (WAIT)
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 app.get("/callers", (req, res) => {
-  const { callerStatus, callerType, limit, wait } = req.query;
+  const { callerStatus, callerType, limit, wait, callerId } = req.query;
 
   // console.log(
   //   styleText(
@@ -110,6 +110,12 @@ app.get("/callers", (req, res) => {
 
   const matchClients = () => {
     let filtered = sdpClients;
+
+    if (callerId) {
+      filtered = filtered.filter((c) => {
+        return String(c.callerId) === String(callerId);
+      });
+    }
 
     if (callerType) {
       filtered = filtered.filter((c) => c.callerType === callerType);
@@ -322,9 +328,19 @@ app.get("/sign-out", (req, res) => {
 // UPDATE CALLER STATUS , SDP OFFER OR SDP ANSWER
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 app.put("/caller", (req, res) => {
-  const { callerId, sdpOffer, sdpAnswer, status } = req.body;
+  const { callerId, sdpOffer, sdpAnswer, callerStatus } = req.body;
 
-  if (!callerId || (!sdpOffer && !sdpAnswer && !status)) {
+  // let sdpOffer1 = sdpOffer ? sdpOffer.slice(0, 10) : "not provided";
+  // let sdpAnswer1 = sdpAnswer ? sdpAnswer.slice(0, 10) : "not provided";
+  // console.log(`callerId  ===> ${callerId}`);
+  // console.log(`sdpOffer  ===> ${sdpOffer1}`);
+  // console.log(`sdpAnswer  ===> ${sdpAnswer1}`);
+  // console.log(`callerStatus  ===> ${callerStatus}`);
+
+  let message = "";
+
+  // if invalid parameters are provided , then return 400
+  if (!callerId || (!sdpOffer && !sdpAnswer && !callerStatus)) {
     console.log(
       styleText(
         "red",
@@ -336,64 +352,107 @@ app.put("/caller", (req, res) => {
     });
   }
 
+  //check if the callerId exists , else return 404
   const callerClient = sdpClients.find((c) => c.callerId == callerId);
-
+  let callerType = callerClient.callerType;
   if (!callerClient) {
     console.log(
       styleText("red", `UPDATE CALLER RESPONSE ===> callerId not found `)
     );
     return res.status(404).json({ message: "callerId not found" });
   }
-  // caller id is found
-  else {
-    // update the sdp offer for the kiosk
-    if (sdpOffer && callerClient.callerType == KIOSK_USER) {
-      callerClient.sdpOffer = sdpOffer;
-      sdpClients.forEach((client) => {
-        if (client.callerId === callerClient.callerId) {
-          client.sdpOffer = callerClient.sdpOffer;
-          console.log(
-            styleText(
-              "blue",
-              `UPDATE CALLER RESPONSE ===> updated sdpOffer for callerId ${callerClient.callerId}`
-            )
-          );
-        }
-      });
-    }
-    // update the sdp answer for the operator
-    else if (sdpAnswer && callerClient.callerType == OPERATOR_USER) {
-      callerClient.sdpAnswer = sdpAnswer;
-      sdpClients.forEach((client) => {
-        if (client.callerId === callerClient.callerId) {
-          client.sdpAnswer = callerClient.sdpAnswer;
-          console.log(
-            styleText(
-              "blue",
-              `UPDATE CALLER RESPONSE ===> updated sdpAnswer for callerId ${callerClient.callerId}`
-            )
-          );
-        }
-      });
-    }
-    //update kiosk or operator status
-    else {
-      callerClient.callerStatus = status;
-      sdpClients.forEach((client) => {
-        if (client.callerId === callerClient.callerId) {
-          client.callerStatus = callerClient.callerStatus;
-          console.log(
-            styleText(
-              "blue",
-              `UPDATE CALLER RESPONSE ===> updated status for callerId ${client.callerId}:${client.callerType} to ${callerClient.callerStatus}`
-            )
-          );
-        }
-      });
-    }
-    //  console.log(sdpClients);
-    return res.status(200).json(callerClient);
+
+  //update caller Status
+  if (callerStatus != null) {
+    sdpClients.forEach((client) => {
+      if (client.callerId === callerClient.callerId) {
+        client.callerStatus = callerStatus;
+        console.log(
+          styleText(
+            "blue",
+            `UPDATE CALLER RESPONSE ===> updated status for callerId ${callerClient.callerId}:${callerType} to ${callerStatus}`
+          )
+        );
+      }
+    });
   }
+
+  //update sdp offer
+  if (sdpOffer != null) {
+    sdpClients.forEach((client) => {
+      if (client.callerId === callerClient.callerId) {
+        client.sdpOffer = sdpOffer;
+        console.log(
+          styleText(
+            "blue",
+            `UPDATE CALLER RESPONSE ===> updated sdp offer for callerId ${callerClient.callerId}:${callerType}`
+          )
+        );
+      }
+    });
+  }
+
+  //update sdpAnswer
+  if (sdpAnswer != null) {
+    sdpClients.forEach((client) => {
+      if (client.callerId === callerClient.callerId) {
+        client.sdpAnswer = sdpAnswer;
+        console.log(
+          styleText(
+            "blue",
+            `UPDATE CALLER RESPONSE ===> updated sdp answer for callerId ${callerClient.callerId}:${callerType}`
+          )
+        );
+      }
+    });
+  }
+  // caller id is found
+  // update the sdp offer for the kiosk
+  // if (sdpOffer && callerClient.callerType == KIOSK_USER) {
+  //   callerClient.sdpOffer = sdpOffer;
+  //   sdpClients.forEach((client) => {
+  //     if (client.callerId === callerClient.callerId) {
+  //       client.sdpOffer = callerClient.sdpOffer;
+  //       console.log(
+  //         styleText(
+  //           "blue",
+  //           `UPDATE CALLER RESPONSE ===> updated sdpOffer for callerId ${callerClient.callerId}`
+  //         )
+  //       );
+  //     }
+  //   });
+  // }
+  // // update the sdp answer for the operator
+  // else if (sdpAnswer && callerClient.callerType == OPERATOR_USER) {
+  //   callerClient.sdpAnswer = sdpAnswer;
+  //   sdpClients.forEach((client) => {
+  //     if (client.callerId === callerClient.callerId) {
+  //       client.sdpAnswer = callerClient.sdpAnswer;
+  //       console.log(
+  //         styleText(
+  //           "blue",
+  //           `UPDATE CALLER RESPONSE ===> updated sdpAnswer for callerId ${callerClient.callerId}`
+  //         )
+  //       );
+  //     }
+  //   });
+  // }
+  // //update kiosk or operator status
+  // else {
+  //   callerClient.callerStatus = callerStatus;
+  //   sdpClients.forEach((client) => {
+  //     if (client.callerId === callerClient.callerId) {
+  //       client.callerStatus = callerClient.callerStatus;
+  //       console.log(
+  //         styleText(
+  //           "blue",
+  //           `UPDATE CALLER RESPONSE ===> updated status for callerId ${client.callerId}:${client.callerType} to ${callerClient.callerStatus}`
+  //         )
+  //       );
+  //     }
+  //   });
+  // }
+  return res.status(200).json(callerClient);
 });
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////

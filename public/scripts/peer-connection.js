@@ -293,19 +293,24 @@ async function generateSdpOffer() {
 /////////////////////////////////////////////////////////////////////////////////////////
 //  GENERATE SDP ANSWER
 /////////////////////////////////////////////////////////////////////////////////////////
-async function generateSdpAnswer() {
-  if (!peerConnection) {
-    console.error("❌ PeerConnection not initialized.");
+async function generateSdpAnswer(remoteSdpOffer) {
+  if (!peerConnection || !remoteSdpOffer) {
+    console.error("❌ PeerConnection not initialized or no SDP offer.");
     return null;
   }
 
   try {
+    await peerConnection.setRemoteDescription({
+      type: "offer",
+      sdp: remoteSdpOffer,
+    });
+
     const answer = await peerConnection.createAnswer();
     await peerConnection.setLocalDescription(answer);
-    output("===== SDP Answer Created =====");
+
+    output("✅ SDP answer created:");
     console.log("✅ SDP answer created:");
-    output(answer.sdp);
-    console.log("👉 Send this SDP to signalling server:", answer.sdp);
+    console.log(answer.sdp);
     return answer;
   } catch (err) {
     console.error("❌ Failed to create SDP answer:", err);

@@ -31,15 +31,31 @@ async function pollAvailableCallers() {
               popupVisible = false;
               stopIncomingAudio();
 
+              // operator clicked on the answer button
               if (accepted) {
-                await updateSdpClient(caller.callerId, null, null, "BUSY");
+                // create operator sdp answer using kiosk's sdp offer
+                let [kioskSdp] = await getCallersInfo(
+                  `callerId=${caller.callerId}`
+                );
+                kioskSdp = kioskSdp.sdpOffer;
+                thisSdpClient.remoteSdpOffer = kioskSdp;
+                thisSdpClient.mySdpAnswer = await generateSdpAnswer(kioskSdp);
+                //update kiosk status to busy
                 await updateSdpClient(
                   thisSdpClient.callerId,
                   null,
-                  null,
+                  thisSdpClient.mySdpAnswer.sdp,
                   "BUSY"
                 );
+                //update operator status to busy
                 thisSdpClient.callerStatus = "BUSY";
+
+                await updateSdpClient(
+                  caller.callerId,
+                  null,
+                  thisSdpClient.mySdpAnswer.sdp,
+                  "BUSY"
+                );
               }
             }
           );
@@ -65,25 +81,7 @@ async function pollAvailableCallers() {
 }
 
 /////////////////////////////////////////////////////////////////////////////////
-// HIDE CALL CONTROL , WHEN NO ONE IS CALLING
-/////////////////////////////////////////////////////////////////////////////////
-
-function hideIncomingCallPopup() {
-  const overlay = document.getElementById("incoming-call-overlay");
-  overlay.style.display = "none";
-  stopIncomingAudio();
-}
-
-function stopIncomingAudio() {
-  if (currentAudio) {
-    currentAudio.pause();
-    currentAudio.currentTime = 0;
-    currentAudio = null;
-  }
-}
-
-/////////////////////////////////////////////////////////////////////////////////
-// SHOW INCOMING CALL TO OPERATOR
+// SHOW INCOMING CALL TO OPERATOR WITH SOUND WHEN A KIOSK NEEDS HELP
 /////////////////////////////////////////////////////////////////////////////////
 
 function showIncomingCallPopup(id, name) {
@@ -113,6 +111,28 @@ function showIncomingCallPopup(id, name) {
       resolve(true); // Accept the call
     };
   });
+}
+
+/////////////////////////////////////////////////////////////////////////////////
+// HIDE CALL CONTROL , WHEN NO ONE IS CALLING
+/////////////////////////////////////////////////////////////////////////////////
+
+function hideIncomingCallPopup() {
+  const overlay = document.getElementById("incoming-call-overlay");
+  overlay.style.display = "none";
+  stopIncomingAudio();
+}
+
+/////////////////////////////////////////////////////////////////////////////////
+// STOP INCOMING CALL SOUND , WHEN NO ONE IS CALLING OR CALL HAS BEEN ANSWERED
+/////////////////////////////////////////////////////////////////////////////////
+
+function stopIncomingAudio() {
+  if (currentAudio) {
+    currentAudio.pause();
+    currentAudio.currentTime = 0;
+    currentAudio = null;
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

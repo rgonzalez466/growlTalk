@@ -31,7 +31,12 @@ const UTYPE_KIOSK = "kiosk";
     console.log("👉 Send this SDP to server:", offer.sdp);
     //console.log(refreshTimer);
     const callerId = await signIn(UTYPE_KIOSK, getKioskName());
-    const sendSdpOffer = await updateSdpClient(callerId, offer.sdp, null, null);
+    const sendSdpOffer = await updateSdpClient(
+      callerId,
+      offer.sdp,
+      null,
+      "AVAILABLE"
+    );
     if (callerId) {
       setInterval(
         () => keepSessionAlive(callerId, UTYPE_KIOSK),
