@@ -1,0 +1,4 @@
+- create a model for logging errors and responses
+- if the server is restarted , the web client should reconnect (bug)
+- after a while , the client will disconnect (bug)
+- add try catch to get all exceptions (bug)
