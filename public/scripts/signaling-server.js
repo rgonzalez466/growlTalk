@@ -23,6 +23,27 @@ async function getEnvVars() {
 }
 
 /////////////////////////////////////////////////////////////////
+// GET CALLERS , CALLING KIOSK OR A SPECIFIC KIOSK DETAILS
+/////////////////////////////////////////////////////////////////
+async function getCallersInfo(query) {
+  try {
+    const url = query ? `/callers?${query}` : `/callers`;
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      throw new Error(`get callers info failed with status ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.filteredSdpClients || []; // Return first caller or null
+  } catch (err) {
+    output("===== FAILED TO GET CALLERS  ===== ");
+    output(`❌ Error retrieving callers: ${err.message}`);
+    console.error(`❌ Error retrieving callers: ${err.message}`);
+    return null;
+  }
+}
+/////////////////////////////////////////////////////////////////
 // CONNECT TO SIGNALING SERVER
 /////////////////////////////////////////////////////////////////
 async function signIn(callerType, callerName) {

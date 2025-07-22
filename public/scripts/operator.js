@@ -12,19 +12,16 @@ let currentAudio = null;
 async function pollAvailableCallers() {
   while (thisSdpClient.callerStatus === "AVAILABLE") {
     try {
-      let url;
+      let getCallerQuery;
+
       if (!popupVisible) {
-        url =
-          "/callers?callerStatus=AVAILABLE&limit=1&wait=60&callerType=kiosk";
+        getCallerQuery =
+          "callerStatus=AVAILABLE&limit=1&wait=60&callerType=kiosk";
       } else {
-        url = "/callers?callerStatus=AVAILABLE&callerType=kiosk";
+        getCallerQuery = "callerStatus=AVAILABLE&callerType=kiosk";
       }
 
-      const response = await fetch(url);
-      if (!response.ok) throw new Error("Non-200 response");
-
-      const data = await response.json();
-      const caller = data.filteredSdpClients?.[0] || null;
+      const [caller] = await getCallersInfo(getCallerQuery);
 
       if (caller && thisSdpClient.callerStatus === "AVAILABLE") {
         if (!popupVisible) {
@@ -47,7 +44,7 @@ async function pollAvailableCallers() {
             }
           );
         }
-        // else: popup already shown → keep showing
+        // Else: popup is already shown → keep showing
       } else {
         // No matching caller or status changed → hide if shown
         if (popupVisible) {
@@ -63,7 +60,7 @@ async function pollAvailableCallers() {
       }
     }
 
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait 1s before next call
   }
 }
 
