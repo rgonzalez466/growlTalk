@@ -69,8 +69,11 @@ async function signIn(callerType, callerName) {
     thisSdpClient.callerStatus = "AVAILABLE";
     thisSdpClient.isOnline = true;
 
+    showStickyNote("CONNECTED");
+
     return data.callerId;
   } catch (err) {
+    showStickyNote("DISCONNECTED");
     output("===== CONNECT TO SIGNALING SERVER ===== ");
     output(`❌ Error during sign-in: ${err.message}`);
     console.error(`❌ Error during sign-in: ${err.message}`);
@@ -113,6 +116,7 @@ async function keepSessionAlive(callerId, callerType) {
     // output(`===== SESSION REFRESHED: ${callerId} ===== `);
     //   output(`💓 Session refreshed for callerId: ${callerId}`);
   } catch (err) {
+    showStickyNote("DISCONNECTED");
     thisSdpClient.isOnline = false;
     output(`❌💓 Error keeping session alive: ${err.message}`);
     console.error(`❌ Error keeping session alive: ${err.message}`);

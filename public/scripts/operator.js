@@ -145,10 +145,10 @@ function stopIncomingAudio() {
         await keepSessionAlive(callerId, UTYPE_OPERATOR);
       } catch (error) {
         // Check if it's a 404 error (session expired/invalid)
+        showStickyNote("DISCONNECTED");
         if (error.status === 404 || error.response?.status === 404) {
           output("⚠️ Session expired, signing in again...");
           console.warn("⚠️ Session expired, signing in again...");
-          showStickyNote("DISCONNECTED");
           try {
             // Clear the current interval
             clearInterval(keepAliveIntervalId);
