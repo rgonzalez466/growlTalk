@@ -69,6 +69,7 @@ const UTYPE_KIOSK = "kiosk";
           attemptSignInLoop(); // Retry sign-in again
         }
       } catch (err) {
+        showStickyNote("DISCONNECTED");
         console.error("❌ Keep-alive failed:", err);
         clearInterval(keepAliveInterval);
         keepAliveInterval = null;

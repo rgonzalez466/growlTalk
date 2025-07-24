@@ -177,15 +177,18 @@ function stopIncomingAudio() {
               // Restart keep-alive with new caller ID
               startKeepAlive(newCallerId, refreshTimer);
             } else {
+              showStickyNote("DISCONNECTED");
               output("❌ Failed to get new caller ID during renewal");
               console.error("❌ Failed to get new caller ID during renewal");
             }
           } catch (renewalError) {
+            showStickyNote("DISCONNECTED");
             output("❌ Failed to renew session");
             console.error("❌ Failed to renew session:", renewalError);
             // Optionally implement exponential backoff retry logic here
           }
         } else {
+          showStickyNote("DISCONNECTED");
           output(`❌ Keep-alive failed with non-404 error ${error}`);
           console.error("❌ Keep-alive failed with non-404 error:", error);
         }
