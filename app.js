@@ -330,11 +330,24 @@ app.get("/sign-out", (req, res) => {
 // UPDATE CALLER STATUS , SDP OFFER OR SDP ANSWER
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 app.put("/caller", (req, res) => {
-  const { callerId, sdpOffer, sdpAnswer, callerStatus, callerIceCandidate } =
-    req.body;
+  const {
+    callerId,
+    sdpOffer,
+    sdpAnswer,
+    callerStatus,
+    callerIceCandidate,
+    calleeIceCandidate,
+  } = req.body;
 
   // if invalid parameters are provided , then return 400
-  if (!callerId || (!sdpOffer && !sdpAnswer && !callerStatus)) {
+  if (
+    !callerId ||
+    (!sdpOffer &&
+      !sdpAnswer &&
+      !callerStatus &&
+      !callerIceCandidate &&
+      !calleeIceCandidate)
+  ) {
     console.log(
       styleText(
         "red",
@@ -400,7 +413,8 @@ app.put("/caller", (req, res) => {
       }
     });
   }
-  //update iceCandidate
+
+  //update Caller iceCandidate
   if (callerIceCandidate != null) {
     sdpClients.forEach((client) => {
       if (client.callerId === callerId) {
@@ -408,7 +422,22 @@ app.put("/caller", (req, res) => {
         console.log(
           styleText(
             "blue",
-            `UPDATE CALLER RESPONSE ===> updated ICE candidate for callerId ${callerId}:${callerType}`
+            `UPDATE CALLER RESPONSE ===> updated Caller ICE candidate for callerId ${callerId}:${callerType}`
+          )
+        );
+      }
+    });
+  }
+
+  //update callee iceCandidate
+  if (calleeIceCandidate != null) {
+    sdpClients.forEach((client) => {
+      if (client.callerId === callerId) {
+        client.calleeIceCandidate = calleeIceCandidate;
+        console.log(
+          styleText(
+            "blue",
+            `UPDATE CALLER RESPONSE ===> updated Callee ICE candidate for callerId ${callerId}:${callerType}`
           )
         );
       }

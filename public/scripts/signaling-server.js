@@ -110,7 +110,7 @@ async function keepSessionAlive(callerId, callerType) {
       throw new Error(`Keep-alive failed with status ${response.status}`);
     }
     thisSdpClient.isOnline = true;
-    output(`===== SESSION REFRESHED: ${callerId} ===== `);
+    // output(`===== SESSION REFRESHED: ${callerId} ===== `);
     //   output(`💓 Session refreshed for callerId: ${callerId}`);
   } catch (err) {
     thisSdpClient.isOnline = false;
@@ -121,14 +121,18 @@ async function keepSessionAlive(callerId, callerType) {
 /////////////////////////////////////////////////////////////////
 // UPDATE SDP OFFER , SDP ANSWER OR SDP CLIENT STATUS
 /////////////////////////////////////////////////////////////////
-async function updateSdpClient(callerId, sdpOffer, sdpAnswer, callerStatus) {
+async function updateSdpClient(req) {
   try {
     const payload = {};
 
-    if (callerId) payload.callerId = callerId;
-    if (sdpOffer != null) payload.sdpOffer = sdpOffer;
-    if (sdpAnswer != null) payload.sdpAnswer = sdpAnswer;
-    if (callerStatus != null) payload.callerStatus = callerStatus;
+    if (req.callerId) payload.callerId = req.callerId;
+    if (req.sdpOffer != null) payload.sdpOffer = req.sdpOffer;
+    if (req.sdpAnswer != null) payload.sdpAnswer = req.sdpAnswer;
+    if (req.callerStatus != null) payload.callerStatus = req.callerStatus;
+    if (req.callerIceCandidate != null)
+      payload.callerIceCandidate = req.callerIceCandidate;
+    if (req.calleeIceCandidate != null)
+      payload.calleeIceCandidate = req.calleeIceCandidate;
 
     const response = await fetch("/caller", {
       method: "PUT",
@@ -142,17 +146,17 @@ async function updateSdpClient(callerId, sdpOffer, sdpAnswer, callerStatus) {
       throw new Error(`update caller failed with status ${response.status}`);
     }
 
-    if (sdpOffer) {
-      thisSdpClient.mySdpOffer = sdpOffer;
+    if (req.sdpOffer) {
+      thisSdpClient.mySdpOffer = req.sdpOffer;
       output(`===== SDP Offer Sent ===== `);
     }
 
-    if (callerStatus) {
-      output(`===== UPDATED CALLER STATUS TO ${callerStatus} ===== `);
-      thisSdpClient.callerStatus = callerStatus;
+    if (req.callerStatus) {
+      output(`===== UPDATED CALLER STATUS TO ${req.callerStatus} ===== `);
+      thisSdpClient.callerStatus = req.callerStatus;
     }
   } catch (err) {
-    if (sdpOffer) {
+    if (req.sdpOffer) {
       output(`❌ update SDP Offer  for caller failed: ${err.message}`);
       console.error(`❌ update SDP Offer for caller failed: ${err.message}`);
     }

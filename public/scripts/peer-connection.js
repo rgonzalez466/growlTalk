@@ -270,19 +270,58 @@ async function initializePeerConnection(sdpClientMedia) {
 /////////////////////////////////////////////////////////////////////////////////////////
 //  GENERATE SDP OFFER (KIOSK)
 /////////////////////////////////////////////////////////////////////////////////////////
-async function generateSdpOffer() {
+async function generateSdpOffer(callerId) {
   if (!peerConnection) {
     console.error("❌ PeerConnection not initialized.");
     return null;
   }
 
   try {
+    // Set up ICE candidate handling for offer
+    peerConnection.onicecandidate = async (event) => {
+      // Event that fires off when a new offer ICE candidate is created
+      if (event.candidate) {
+        console.log("New ICE candidate for offer:", event.candidate);
+
+        // Here you can send the complete SDP offer with ICE candidates to your signaling server
+        // The localDescription will be updated with ICE candidates
+        if (peerConnection.localDescription) {
+          console.log("Updated SDP offer with ICE candidates:");
+          console.log(peerConnection.localDescription.sdp);
+
+          // Check how many ICE candidates are in the SDP
+          const candidateCount = (
+            peerConnection.localDescription.sdp.match(/a=candidate/g) || []
+          ).length;
+          output(`🧊 ICE candidates in offer: ${candidateCount}`);
+
+          // Send offer with icde candidate to  signaling server
+          let kioskOfferPayload = {
+            callerId: callerId,
+            sdpOffer: {
+              type: "offer",
+              sdp: peerConnection.localDescription.sdp,
+              caller: callerId,
+            },
+            callerStatus: "AVAILABLE",
+          };
+
+          await updateSdpClient(kioskOfferPayload);
+        }
+      } else {
+        // ICE gathering complete
+        console.log("ICE gathering complete for offer");
+      }
+    };
+
     const offer = await peerConnection.createOffer();
     await peerConnection.setLocalDescription(offer);
+
     output("===== SDP Offer Created ===== ");
     console.log("✅ SDP offer created:");
     output(offer.sdp);
     console.log("👉 Send this SDP to signalling server:", offer.sdp);
+
     return offer;
   } catch (err) {
     console.error("❌ Failed to create SDP offer:", err);
@@ -293,13 +332,67 @@ async function generateSdpOffer() {
 /////////////////////////////////////////////////////////////////////////////////////////
 //  GENERATE SDP ANSWER (OPERATOR)
 /////////////////////////////////////////////////////////////////////////////////////////
-async function generateSdpAnswer(remoteSdpOffer) {
+async function generateSdpAnswer(remoteSdpOffer, kioskId, operatorId) {
+  console.log(remoteSdpOffer);
+
   if (!peerConnection || !remoteSdpOffer) {
     console.error("❌ PeerConnection not initialized or no SDP offer.");
     return null;
   }
 
   try {
+    // Set up ICE candidate handling for answer
+    peerConnection.onicecandidate = async (event) => {
+      // Event that fires off when a new answer ICE candidate is created
+      if (event.candidate) {
+        console.log("New ICE candidate for answer:", event.candidate);
+
+        // send the complete SDP answer with ICE candidates to the signaling server
+        // The localDescription will be updated with ICE candidates
+        if (peerConnection.localDescription) {
+          console.log("Updated SDP answer with ICE candidates:");
+          console.log(peerConnection.localDescription.sdp);
+
+          // Check how many ICE candidates are in the SDP
+          const candidateCount = (
+            peerConnection.localDescription.sdp.match(/a=candidate/g) || []
+          ).length;
+          output(`🧊 ICE candidates in answer: ${candidateCount}`);
+
+          let updateKioskPayload = {
+            callerId: kioskId,
+            sdpAnswer: {
+              type: "answer",
+              sdp: peerConnection.localDescription.sdp,
+              caller: kioskId,
+              callee: operatorId,
+            },
+            callerStatus: "BUSY",
+          };
+
+          let updateOperatorkPayload = {
+            callerId: operatorId,
+            sdpAnswer: {
+              type: "answer",
+              sdp: peerConnection.localDescription.sdp,
+              caller: kioskId,
+              callee: operatorId,
+            },
+            callerStatus: "BUSY",
+          };
+
+          //update kiosk status to busy
+          await updateSdpClient(updateKioskPayload);
+          //update operator status to busy
+          thisSdpClient.callerStatus = "BUSY";
+          await updateSdpClient(updateOperatorkPayload);
+        }
+      } else {
+        // ICE gathering complete
+        console.log("ICE gathering complete for answer");
+      }
+    };
+
     await peerConnection.setRemoteDescription({
       type: "offer",
       sdp: remoteSdpOffer,
@@ -311,6 +404,7 @@ async function generateSdpAnswer(remoteSdpOffer) {
     output("✅ SDP answer created:");
     console.log("✅ SDP answer created:");
     console.log(answer.sdp);
+
     return answer;
   } catch (err) {
     console.error("❌ Failed to create SDP answer:", err);
@@ -321,16 +415,146 @@ async function generateSdpAnswer(remoteSdpOffer) {
 /////////////////////////////////////////////////////////////////////////////////////////
 //  APPLY SDP ANSWER (KIOSK)
 /////////////////////////////////////////////////////////////////////////////////////////
-async function applyRemoteSdpAnswer(answerSdp) {
+// async function applyRemoteSdpAnswer(remoteAnswer) {
+//   if (!peerConnection || !remoteAnswer) {
+//     console.error("❌ PeerConnection not initialized or no SDP answer.");
+//     return false;
+//   }
+
+//   try {
+//     // Extract SDP string if remoteAnswer is an object
+//     let sdpString;
+//     if (typeof remoteAnswer === "string") {
+//       sdpString = remoteAnswer;
+//     } else if (remoteAnswer.sdp) {
+//       sdpString = remoteAnswer.sdp;
+//     } else {
+//       throw new Error("Invalid SDP answer format");
+//     }
+
+//     console.log("Setting remote answer:", sdpString);
+
+//     await peerConnection.setRemoteDescription({
+//       type: "answer",
+//       sdp: sdpString,
+//     });
+
+//     console.log("✅ Remote answer applied successfully");
+//     return true;
+//   } catch (err) {
+//     console.error("❌ Failed to apply remote answer:", err);
+//     return false;
+//   }
+// }
+/////////////////////////////////////////////////////////////////////////////////////////
+//
+/////////////////////////////////////////////////////////////////////////////////////////
+// Helper function to handle incoming ICE candidates from remote peer
+async function addIceCandidate(candidateData) {
+  if (!peerConnection) {
+    console.error("❌ PeerConnection not initialized.");
+    return;
+  }
+
   try {
-    const answerDesc = new RTCSessionDescription({
+    if (candidateData && candidateData.candidate) {
+      await peerConnection.addIceCandidate(new RTCIceCandidate(candidateData));
+      console.log("✅ ICE candidate added successfully");
+    }
+  } catch (err) {
+    console.error("❌ Failed to add ICE candidate:", err);
+  }
+}
+
+// Function to apply the remote answer (caller uses this after receiving answer from callee)
+async function applyRemoteSdpAnswer(remoteAnswer) {
+  if (!peerConnection || !remoteAnswer) {
+    console.error("❌ PeerConnection not initialized or no SDP answer.");
+    return false;
+  }
+
+  try {
+    // Extract SDP string if remoteAnswer is an object
+    let sdpString;
+    if (typeof remoteAnswer === "string") {
+      sdpString = remoteAnswer;
+    } else if (remoteAnswer.sdp) {
+      sdpString = remoteAnswer.sdp;
+    } else {
+      throw new Error("Invalid SDP answer format");
+    }
+
+    console.log("Setting remote answer:", sdpString);
+
+    await peerConnection.setRemoteDescription({
       type: "answer",
-      sdp: answerSdp,
+      sdp: sdpString,
     });
 
-    await peerConnection.setRemoteDescription(answerDesc);
-    output("✅ Remote SDP Answer applied.");
+    console.log("✅ Remote answer applied successfully");
+    return true;
   } catch (err) {
-    console.error("❌ Failed to apply remote SDP answer:", err);
+    console.error("❌ Failed to apply remote answer:", err);
+    return false;
   }
+}
+
+// Function to set up remote stream handling
+function setupRemoteStreamHandling() {
+  if (!peerConnection) {
+    console.error("❌ PeerConnection not initialized.");
+    return;
+  }
+
+  peerConnection.ontrack = (event) => {
+    console.log("🎥 Received remote track:", event.track);
+
+    event.streams.forEach((stream) => {
+      console.log("📺 Remote stream received:", stream.id);
+
+      // Handle different stream types based on your implementation
+      if (stream.id === "stream_id") {
+        // Webcam stream
+        if (this.remoteVideo) {
+          this.remoteVideo.srcObject = stream;
+          console.log("Remote webcam video set");
+        }
+      } else if (stream.id === SCREEN_SHARE) {
+        // Screen share stream
+        if (this.remoteScreen) {
+          this.remoteScreen.srcObject = stream;
+          console.log("Remote screen share video set");
+        }
+      } else {
+        // Fallback - assign to available video elements
+        console.log("Assigning remote stream to video element");
+        // Add your logic here to assign streams to video elements
+      }
+    });
+  };
+
+  // Monitor connection state
+  peerConnection.onconnectionstatechange = () => {
+    console.log("🔗 Connection state:", peerConnection.connectionState);
+
+    switch (peerConnection.connectionState) {
+      case "connected":
+        console.log("✅ Peer connection established successfully!");
+        break;
+      case "disconnected":
+        console.log("⚠️ Peer connection disconnected");
+        break;
+      case "failed":
+        console.log("❌ Peer connection failed");
+        break;
+      case "closed":
+        console.log("🔒 Peer connection closed");
+        break;
+    }
+  };
+
+  // Monitor ICE connection state
+  peerConnection.oniceconnectionstatechange = () => {
+    console.log("🧊 ICE connection state:", peerConnection.iceConnectionState);
+  };
 }

@@ -37,24 +37,15 @@ async function pollAvailableCallers() {
                 let [kioskSdp] = await getCallersInfo(
                   `callerId=${caller.callerId}`
                 );
-                kioskSdp = kioskSdp.sdpOffer;
-                thisSdpClient.remoteSdpOffer = kioskSdp;
-                thisSdpClient.mySdpAnswer = await generateSdpAnswer(kioskSdp);
-                //update kiosk status to busy
-                await updateSdpClient(
-                  thisSdpClient.callerId,
-                  null,
-                  thisSdpClient.mySdpAnswer.sdp,
-                  "BUSY"
-                );
-                //update operator status to busy
-                thisSdpClient.callerStatus = "BUSY";
 
-                await updateSdpClient(
+                kioskSdp = kioskSdp.sdpOffer;
+
+                thisSdpClient.remoteSdpOffer = kioskSdp;
+
+                thisSdpClient.mySdpAnswer = await generateSdpAnswer(
+                  kioskSdp.sdp,
                   caller.callerId,
-                  null,
-                  thisSdpClient.mySdpAnswer.sdp,
-                  "BUSY"
+                  thisSdpClient.callerId
                 );
               }
             }
@@ -175,7 +166,12 @@ function stopIncomingAudio() {
                 newCallerId
               );
 
-              await updateSdpClient(newCallerId, null, null, "AVAILABLE");
+              let newPayload = {
+                callerId: newCallerId,
+                callerStatus: "AVAILABLE",
+              };
+
+              await updateSdpClient(newPayload);
 
               // Restart keep-alive with new caller ID
               startKeepAlive(newCallerId, refreshTimer);
@@ -208,18 +204,18 @@ function stopIncomingAudio() {
 
   sdpClientMedia = await listAllDevices();
   await initializePeerConnection(sdpClientMedia);
-  //const offer = await generateSdpOffer();
+  setupRemoteStreamHandling();
 
   //if (offer) {
   const refreshTimer = (await getEnvVars().DELETE_TIMER) || 10000;
   currentCallerId = await signIn(UTYPE_OPERATOR, getOperatorName());
 
-  const sendSdpAnswer = await updateSdpClient(
-    currentCallerId,
-    null,
-    null,
-    "AVAILABLE"
-  );
+  let payload = {
+    callerId: currentCallerId,
+    callerStatus: "AVAILABLE",
+  };
+
+  const sendSdpAnswer = await updateSdpClient(payload);
 
   if (thisSdpClient.isOnline === true) {
     pollAvailableCallers();

@@ -21,12 +21,7 @@ const UTYPE_KIOSK = "kiosk";
 
   sdpClientMedia = await listAllDevices();
   await initializePeerConnection(sdpClientMedia);
-
-  const offer = await generateSdpOffer();
-  if (!offer) {
-    console.error("❌ SDP offer not generated. Exiting.");
-    return;
-  }
+  setupRemoteStreamHandling();
 
   let callerId = null;
   let keepAliveInterval = null;
@@ -37,8 +32,14 @@ const UTYPE_KIOSK = "kiosk";
       try {
         callerId = await signIn(UTYPE_KIOSK, getKioskName());
         if (callerId) {
-          await updateSdpClient(callerId, offer.sdp, null, "AVAILABLE");
           console.log(`✅ Signed in as ${callerId}`);
+          let offer = await generateSdpOffer(callerId);
+          if (!offer) {
+            console.error("❌ SDP offer not generated. Exiting.");
+            return;
+          }
+
+          //  await updateSdpClient(callerId, offer.sdp, null, "AVAILABLE");
           startKeepAliveLoop();
           startCallerInfoPolling();
         }
@@ -81,9 +82,23 @@ const UTYPE_KIOSK = "kiosk";
         try {
           let [myProfile] = await getCallersInfo(`callerId=${callerId}`);
           console.log("👀 Fetched my profile info:", myProfile);
-          if (myProfile.sdpAnswer != null) {
-            output("Connectet to Operator ...");
-            await applyRemoteSdpAnswer(myProfile.sdpAnswer);
+
+          // Handle SDP Answer
+          if (
+            myProfile.sdpAnswer != null &&
+            !peerConnection.currentRemoteDescription
+          ) {
+            await applyRemoteSdpAnswer(myProfile.sdpAnswer.sdp);
+          }
+
+          // Handle ICE candidates (if your API supports it)
+          if (
+            myProfile.iceCandidates &&
+            Array.isArray(myProfile.iceCandidates)
+          ) {
+            for (const candidate of myProfile.iceCandidates) {
+              await addIceCandidate(candidate);
+            }
           }
         } catch (err) {
           console.error("⚠️ Failed to fetch my profile info:", err.message);
