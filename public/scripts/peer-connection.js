@@ -281,13 +281,13 @@ async function generateSdpOffer(callerId) {
     peerConnection.onicecandidate = async (event) => {
       // Event that fires off when a new offer ICE candidate is created
       if (event.candidate) {
-        console.log("New ICE candidate for offer:", event.candidate);
+        // console.log("New ICE candidate for offer:", event.candidate);
 
         // Here you can send the complete SDP offer with ICE candidates to your signaling server
         // The localDescription will be updated with ICE candidates
         if (peerConnection.localDescription) {
-          console.log("Updated SDP offer with ICE candidates:");
-          console.log(peerConnection.localDescription.sdp);
+          //  console.log("Updated SDP offer with ICE candidates:");
+          //   console.log(peerConnection.localDescription.sdp);
 
           // Check how many ICE candidates are in the SDP
           const candidateCount = (
@@ -310,7 +310,7 @@ async function generateSdpOffer(callerId) {
         }
       } else {
         // ICE gathering complete
-        console.log("ICE gathering complete for offer");
+        console.log("✅ ICE gathering complete for offer");
       }
     };
 
@@ -320,7 +320,7 @@ async function generateSdpOffer(callerId) {
     output("===== SDP Offer Created ===== ");
     console.log("✅ SDP offer created:");
     output(offer.sdp);
-    console.log("👉 Send this SDP to signalling server:", offer.sdp);
+    //console.log("👉 Send this SDP to signalling server:", offer.sdp);
 
     return offer;
   } catch (err) {
@@ -333,7 +333,7 @@ async function generateSdpOffer(callerId) {
 //  GENERATE SDP ANSWER (OPERATOR)
 /////////////////////////////////////////////////////////////////////////////////////////
 async function generateSdpAnswer(remoteSdpOffer, kioskId, operatorId) {
-  console.log(remoteSdpOffer);
+  //console.log(remoteSdpOffer);
 
   if (!peerConnection || !remoteSdpOffer) {
     console.error("❌ PeerConnection not initialized or no SDP offer.");
@@ -345,7 +345,7 @@ async function generateSdpAnswer(remoteSdpOffer, kioskId, operatorId) {
     peerConnection.onicecandidate = async (event) => {
       // Event that fires off when a new answer ICE candidate is created
       if (event.candidate) {
-        console.log("New ICE candidate for answer:", event.candidate);
+        // console.log("New ICE candidate for answer:", event.candidate);
 
         // send the complete SDP answer with ICE candidates to the signaling server
         // The localDescription will be updated with ICE candidates
@@ -357,7 +357,7 @@ async function generateSdpAnswer(remoteSdpOffer, kioskId, operatorId) {
           const candidateCount = (
             peerConnection.localDescription.sdp.match(/a=candidate/g) || []
           ).length;
-          output(`🧊 ICE candidates in answer: ${candidateCount}`);
+          console.log(`🧊 ICE candidates in answer: ${candidateCount}`);
 
           let updateKioskPayload = {
             callerId: kioskId,
@@ -389,7 +389,7 @@ async function generateSdpAnswer(remoteSdpOffer, kioskId, operatorId) {
         }
       } else {
         // ICE gathering complete
-        console.log("ICE gathering complete for answer");
+        console.log("✅ ICE gathering complete for answer");
       }
     };
 
@@ -484,7 +484,7 @@ async function applyRemoteSdpAnswer(remoteAnswer) {
       throw new Error("Invalid SDP answer format");
     }
 
-    console.log("Setting remote answer:", sdpString);
+    // console.log("Setting remote answer:", sdpString);
 
     await peerConnection.setRemoteDescription({
       type: "answer",
