@@ -210,7 +210,7 @@ async function initializePeerConnection(sdpClientMedia) {
   // === Initialize RTCPeerConnection ===
   peerConnection = new RTCPeerConnection();
 
-  // === Webcam stream (for stream_id) ===
+  // === Webcam stream with audio (for stream_id) ===
   if (webcamDevice) {
     const webcamStream = await navigator.mediaDevices.getUserMedia({
       video: {
@@ -222,15 +222,30 @@ async function initializePeerConnection(sdpClientMedia) {
       audio: hasAudio,
     });
 
+    // Add video track
     const videoTrack = webcamStream.getVideoTracks()[0];
+    if (videoTrack) {
+      const webcamWrapperStream = new MediaStream([videoTrack]);
+      Object.defineProperty(webcamWrapperStream, "id", { value: "stream_id" });
+      peerConnection.addTrack(videoTrack, webcamWrapperStream);
+      localStream.addTrack(videoTrack);
+      console.log("Added webcam video track:", videoTrack.label);
+    }
 
-    const webcamWrapperStream = new MediaStream([videoTrack]);
-    Object.defineProperty(webcamWrapperStream, "id", { value: "stream_id" });
-
-    //    console.log(videoTrack);
-    peerConnection.addTrack(videoTrack, webcamWrapperStream);
-    localStream.addTrack(videoTrack);
-    console.log("Added webcam track:", videoTrack.label);
+    // Add audio track if available
+    const audioTracks = webcamStream.getAudioTracks();
+    if (audioTracks.length > 0 && hasAudio) {
+      const audioTrack = audioTracks[0];
+      const audioWrapperStream = new MediaStream([audioTrack]);
+      Object.defineProperty(audioWrapperStream, "id", {
+        value: "audio_stream_id",
+      });
+      peerConnection.addTrack(audioTrack, audioWrapperStream);
+      localStream.addTrack(audioTrack);
+      console.log("Added webcam audio track:", audioTrack.label);
+    } else {
+      console.log("No audio track available or audio disabled");
+    }
   }
 
   // === UScreenCapture stream (for screen_id) ===
@@ -247,14 +262,13 @@ async function initializePeerConnection(sdpClientMedia) {
 
     const screenTrack = screenStream.getVideoTracks()[0];
 
-    // Create wrapper stream with screen_id
-    const screenWrapperStream = new MediaStream([screenTrack]);
-    Object.defineProperty(screenWrapperStream, "id", { value: "screen_id" });
-
-    //console.log(screenTrack);
-    peerConnection.addTrack(screenTrack, screenWrapperStream);
-    desktopStream.addTrack(screenTrack);
-    console.log("Added screen capture track:", screenTrack.label);
+    if (screenTrack) {
+      const screenWrapperStream = new MediaStream([screenTrack]);
+      Object.defineProperty(screenWrapperStream, "id", { value: "screen_id" });
+      peerConnection.addTrack(screenTrack, screenWrapperStream);
+      desktopStream.addTrack(screenTrack);
+      console.log("Added screen capture track:", screenTrack.label);
+    }
   }
 
   if (this.localVideo != null) {

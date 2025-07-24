@@ -148,8 +148,8 @@ video {
     #logPanel {
       position: fixed;
       top: 0;
-      right: 0px;
-      /* right: -400px;  change to this later*/
+        right: -500px;
+          transition: right 0.3s ease;
       width: 450px;
       height: 90%;
       background-color: #801568;

@@ -12,17 +12,6 @@ function output(message) {
 }
 
 /////////////////////////////////////////////////////////////////
-// SHOW / HIDE LOG PANELS
-/////////////////////////////////////////////////////////////////
-logToggleBtn.addEventListener("click", () => {
-  logPanel.classList.add("show");
-});
-
-hideLogBtn.addEventListener("click", () => {
-  logPanel.classList.remove("show");
-});
-
-/////////////////////////////////////////////////////////////////
 // SHOW TOAST
 /////////////////////////////////////////////////////////////////
 function showToast(message, type = "success") {
@@ -116,6 +105,18 @@ async function handleHomeButtonClick(event) {
 // Add event listener when DOM is loaded
 document.addEventListener("DOMContentLoaded", function () {
   const homeButton = document.getElementById("homeButton");
+  const logToggleBtn = document.getElementById("logToggleBtn");
+  const logPanel = document.getElementById("logPanel");
+  const hideLogBtn = document.getElementById("hideLogBtn");
+
+  logToggleBtn.addEventListener("click", () => {
+    logPanel.classList.add("show");
+  });
+
+  hideLogBtn.addEventListener("click", () => {
+    logPanel.classList.remove("show");
+  });
+
   if (homeButton) {
     homeButton.addEventListener("click", handleHomeButtonClick);
   }
