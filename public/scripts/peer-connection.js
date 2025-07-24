@@ -350,8 +350,8 @@ async function generateSdpAnswer(remoteSdpOffer, kioskId, operatorId) {
         // send the complete SDP answer with ICE candidates to the signaling server
         // The localDescription will be updated with ICE candidates
         if (peerConnection.localDescription) {
-          console.log("Updated SDP answer with ICE candidates:");
-          console.log(peerConnection.localDescription.sdp);
+          // console.log("Updated SDP answer with ICE candidates:");
+          //   console.log(peerConnection.localDescription.sdp);
 
           // Check how many ICE candidates are in the SDP
           const candidateCount = (
@@ -403,7 +403,7 @@ async function generateSdpAnswer(remoteSdpOffer, kioskId, operatorId) {
 
     output("✅ SDP answer created:");
     console.log("✅ SDP answer created:");
-    console.log(answer.sdp);
+    //  console.log(answer.sdp);
 
     return answer;
   } catch (err) {
@@ -412,40 +412,6 @@ async function generateSdpAnswer(remoteSdpOffer, kioskId, operatorId) {
   }
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////
-//  APPLY SDP ANSWER (KIOSK)
-/////////////////////////////////////////////////////////////////////////////////////////
-// async function applyRemoteSdpAnswer(remoteAnswer) {
-//   if (!peerConnection || !remoteAnswer) {
-//     console.error("❌ PeerConnection not initialized or no SDP answer.");
-//     return false;
-//   }
-
-//   try {
-//     // Extract SDP string if remoteAnswer is an object
-//     let sdpString;
-//     if (typeof remoteAnswer === "string") {
-//       sdpString = remoteAnswer;
-//     } else if (remoteAnswer.sdp) {
-//       sdpString = remoteAnswer.sdp;
-//     } else {
-//       throw new Error("Invalid SDP answer format");
-//     }
-
-//     console.log("Setting remote answer:", sdpString);
-
-//     await peerConnection.setRemoteDescription({
-//       type: "answer",
-//       sdp: sdpString,
-//     });
-
-//     console.log("✅ Remote answer applied successfully");
-//     return true;
-//   } catch (err) {
-//     console.error("❌ Failed to apply remote answer:", err);
-//     return false;
-//   }
-// }
 /////////////////////////////////////////////////////////////////////////////////////////
 //
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -506,6 +472,8 @@ function setupRemoteStreamHandling() {
     return;
   }
 
+  let streamCounter = 0; // Track received streams
+
   peerConnection.ontrack = (event) => {
     console.log("🎥 Received remote track:", event.track);
 
@@ -519,16 +487,36 @@ function setupRemoteStreamHandling() {
           this.remoteVideo.srcObject = stream;
           console.log("Remote webcam video set");
         }
-      } else if (stream.id === SCREEN_SHARE) {
+      } else if (stream.id === "screen_id") {
         // Screen share stream
         if (this.remoteScreen) {
           this.remoteScreen.srcObject = stream;
           console.log("Remote screen share video set");
         }
       } else {
-        // Fallback - assign to available video elements
+        // Fallback - assign to available video elements based on order
         console.log("Assigning remote stream to video element");
-        // Add your logic here to assign streams to video elements
+        streamCounter++;
+
+        if (streamCounter === 1) {
+          // First stream goes to remoteVideo (webcam)
+          const remoteVideo = document.getElementById("remoteVideo"); // Remote camera video element
+          if (remoteVideo) {
+            remoteVideo.srcObject = stream;
+            console.log(
+              "✅ First remote stream assigned to remoteVideo (remoteVideo)"
+            );
+          }
+        } else if (streamCounter === 2) {
+          // Second stream goes to remoteScreen (desktop)
+          const remoteScreen = document.getElementById("remoteScreen"); // Remote desktop video element
+          if (remoteScreen) {
+            remoteScreen.srcObject = stream;
+            console.log(
+              "✅ Second remote stream assigned to remoteScreen (remoteScreen)"
+            );
+          }
+        }
       }
     });
   };
