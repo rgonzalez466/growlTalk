@@ -1,6 +1,10 @@
-- create a model for logging errors and responses
+ENHANCEMENTS
+- create a standard model for logging errors and responses
+
+
+BUGS 
 - if the server is restarted , the web client should reconnect (bug)
+- when refresh or close windows ... should log out client
 - after a while , the client will disconnect (bug)
 - add try catch to get all exceptions (bug)
-- implement ice candidates ... use the /callers endpoint 
-- when refresh or close windows ... should log out kiosk (kiosk)
+- if a kiosk has left and try to connect ... then remove it , rather an exception (bug)

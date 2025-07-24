@@ -109,6 +109,19 @@ document.addEventListener("DOMContentLoaded", function () {
   const logPanel = document.getElementById("logPanel");
   const hideLogBtn = document.getElementById("hideLogBtn");
 
+  const mainVideo = document.getElementById("mainVideo");
+  const thumbnails = document.querySelectorAll(".thumbnails video");
+
+  thumbnails.forEach((thumb) => {
+    thumb.addEventListener("dblclick", () => {
+      if (thumb.srcObject) {
+        mainVideo.srcObject = thumb.srcObject;
+      } else {
+        mainVideo.src = thumb.src;
+      }
+    });
+  });
+
   logToggleBtn.addEventListener("click", () => {
     logPanel.classList.add("show");
   });

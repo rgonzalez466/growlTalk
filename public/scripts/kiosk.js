@@ -27,12 +27,15 @@ const UTYPE_KIOSK = "kiosk";
   let keepAliveInterval = null;
   let callerInfoInterval = null;
 
+  showStickyNote("DISCONNECTED");
+
   async function attemptSignInLoop() {
     while (!callerId) {
       try {
         callerId = await signIn(UTYPE_KIOSK, getKioskName());
         if (callerId) {
           console.log(`✅ Signed in as ${callerId}`);
+          showStickyNote("CONNECTED");
           let offer = await generateSdpOffer(callerId);
           if (!offer) {
             console.error("❌ SDP offer not generated. Exiting.");
@@ -56,6 +59,7 @@ const UTYPE_KIOSK = "kiosk";
         await keepSessionAlive(callerId, UTYPE_KIOSK);
 
         if (!thisSdpClient.isOnline) {
+          showStickyNote("DISCONNECTED");
           console.warn("🔴 Session marked offline. Stopping keep-alive.");
           clearInterval(keepAliveInterval);
           keepAliveInterval = null;

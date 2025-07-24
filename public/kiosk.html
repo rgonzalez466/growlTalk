@@ -26,39 +26,16 @@
     <div class="section">
       <strong>Video Feeds:</strong>
       <div class="video-section">
-        <div>
-          <label>Remote Video</label><br />
-          <video
-            id="remoteVideo"
-            autoplay
-            playsinline
-            width="320"
-            height="240"
-          ></video>
-        </div>
-        <div>
-          <label>Remote Screen</label><br />
-          <video id="remoteScreen" autoplay width="320" height="240"></video>
-        </div>
-        <div>
-          <label>Local Video</label><br />
-          <video
-            id="localVideo"
-            autoplay
-            muted
-            width="320"
-            height="240"
-          ></video>
-        </div>
-        <div>
-          <label>Local Screen</label><br />
-          <video
-            id="localScreen"
-            autoplay
-            muted
-            width="320"
-            height="240"
-          ></video>
+        <div class="video-container">
+          <div class="main-video">
+            <video id="mainVideo" autoplay playsinline muted></video>
+          </div>
+          <div class="thumbnails">
+            <video id="localVideo" autoplay muted></video>
+            <video id="localScreen" autoplay muted></video>
+            <video id="remoteVideo" autoplay playsinline></video>
+            <video id="remoteScreen" autoplay playsinline></video>
+          </div>
         </div>
       </div>
     </div>

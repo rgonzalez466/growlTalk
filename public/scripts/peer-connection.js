@@ -542,9 +542,11 @@ function setupRemoteStreamHandling() {
     switch (peerConnection.connectionState) {
       case "connected":
         console.log("✅ Peer connection established successfully!");
+        showToast("Call Started ", "success");
         break;
       case "disconnected":
         console.log("⚠️ Peer connection disconnected");
+        showToast("Call Ended ⚠️", "error");
         break;
       case "failed":
         console.log("❌ Peer connection failed");
