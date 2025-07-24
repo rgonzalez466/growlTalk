@@ -148,7 +148,7 @@ function stopIncomingAudio() {
         if (error.status === 404 || error.response?.status === 404) {
           output("⚠️ Session expired, signing in again...");
           console.warn("⚠️ Session expired, signing in again...");
-
+          showStickyNote("DISCONNECTED");
           try {
             // Clear the current interval
             clearInterval(keepAliveIntervalId);
@@ -158,6 +158,7 @@ function stopIncomingAudio() {
 
             if (newCallerId) {
               currentCallerId = newCallerId;
+              showStickyNote("CONNECTED");
               output(
                 `✅ Successfully renewed session with new caller ID: ${newCallerId}`
               );
@@ -218,6 +219,7 @@ function stopIncomingAudio() {
   const sendSdpAnswer = await updateSdpClient(payload);
 
   if (thisSdpClient.isOnline === true) {
+    showStickyNote("CONNECTED");
     pollAvailableCallers();
   }
 
