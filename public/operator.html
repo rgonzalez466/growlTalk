@@ -29,22 +29,64 @@
 
     <hr />
 
-    <strong>Video Feeds:</strong>
-
     <div class="section">
       <div class="video-container">
         <div class="main-video">
+          <!-- <div class="video-slot"> -->
           <video id="mainVideo" autoplay playsinline muted></video>
+          <!-- <img
+              class="video-placeholder"
+              id="mainVideoPlaceholder"
+              src="/assets/waiting.png"
+            /> -->
+          <!-- </div> -->
         </div>
         <div class="thumbnails">
-          <strong>Local Video</strong>
-          <video id="localVideo" autoplay muted></video>
-          <strong>Local Screen</strong>
-          <video id="localScreen" autoplay muted></video>
-          <strong>Remote Video :</strong>
-          <video id="remoteVideo" autoplay playsinline></video>
-          <strong>Remote Screen :</strong>
-          <video id="remoteScreen" autoplay playsinline></video>
+          <div>
+            <strong class="camera-name">Local Video</strong>
+            <div class="video-slot">
+              <img
+                class="video-placeholder"
+                id="localVideoPlaceholder"
+                src="/assets/waiting.png"
+              />
+              <video id="localVideo" autoplay muted></video>
+            </div>
+          </div>
+          <div>
+            <strong class="camera-name">Local Desktop</strong>
+            <div class="video-slot">
+              <img
+                class="video-placeholder"
+                id="localScreenPlaceholder"
+                src="/assets/waiting.png"
+              />
+              <video id="localScreen" autoplay muted></video>
+            </div>
+          </div>
+          <div>
+            <strong class="camera-name">Remote Video</strong>
+            <div class="video-slot">
+              <img
+                class="video-placeholder"
+                id="remoteVideoPlaceholder"
+                src="/assets/waiting.png"
+              />
+              <video id="remoteVideo" autoplay playsinline></video>
+            </div>
+          </div>
+          <div>
+            <strong class="camera-name">Remote Desktop</strong>
+
+            <div class="video-slot">
+              <img
+                class="video-placeholder"
+                id="remoteScreenPlaceholder"
+                src="/assets/waiting.png"
+              />
+              <video id="remoteScreen" autoplay playsinline></video>
+            </div>
+          </div>
         </div>
       </div>
     </div>
