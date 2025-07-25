@@ -532,6 +532,26 @@ function setupRemoteStreamHandling() {
           }
         }
       }
+
+      remoteVideo.onplaying = () => {
+        console.log("✅ Remote video playing");
+        showVideo("remoteVideo");
+
+        // Now play local streams
+        if (localVideo.srcObject) {
+          localVideo.play().then(() => showVideo("localVideo"));
+        }
+        if (localScreen.srcObject) {
+          localScreen.play().then(() => showVideo("localScreen"));
+        }
+      };
+
+      remoteScreen.onplaying = () => {
+        console.log("✅ Remote screen playing");
+        showVideo("remoteScreen");
+
+        // Optional: wait for screen instead of remoteVideo
+      };
     });
   };
 
@@ -543,15 +563,45 @@ function setupRemoteStreamHandling() {
       case "connected":
         console.log("✅ Peer connection established successfully!");
         showToast("Call Started ", "success");
+
         break;
       case "disconnected":
         console.log("⚠️ Peer connection disconnected");
+        if (this.localVideo) this.localVideo.pause();
+        if (this.localScreen) this.localScreen.pause();
+        if (this.remoteVideo) this.remoteVideo.pause();
+        if (this.remoteScreen) this.remoteScreen.pause();
+
+        showPlaceholder("mainSlot");
+        showPlaceholder("remoteVideo");
+        showPlaceholder("remoteScreen");
+        showPlaceholder("localVideo");
+        showPlaceholder("localScreen");
+
         showToast("Call Ended ⚠️", "error");
         break;
       case "failed":
+        if (this.localVideo) this.localVideo.pause();
+        if (this.localScreen) this.localScreen.pause();
+        if (this.remoteVideo) this.remoteVideo.pause();
+        if (this.remoteScreen) this.remoteScreen.pause();
+        showPlaceholder("mainSlot");
+        showPlaceholder("remoteVideo");
+        showPlaceholder("remoteScreen");
+        showPlaceholder("localVideo");
+        showPlaceholder("localScreen");
         console.log("❌ Peer connection failed");
         break;
       case "closed":
+        if (this.localVideo) this.localVideo.pause();
+        if (this.localScreen) this.localScreen.pause();
+        if (this.remoteVideo) this.remoteVideo.pause();
+        if (this.remoteScreen) this.remoteScreen.pause();
+        //showPlaceholder("mainSlot");
+        showPlaceholder("remoteVideo");
+        showPlaceholder("remoteScreen");
+        showPlaceholder("localVideo");
+        showPlaceholder("localScreen");
         console.log("🔒 Peer connection closed");
         break;
     }

@@ -141,3 +141,23 @@ window.addEventListener("beforeunload", function (event) {
     navigator.sendBeacon(`/sign-out?callerId=${thisSdpClient.callerId}`);
   }
 });
+
+function showVideo(videoId) {
+  const video = document.getElementById(videoId);
+  const placeholder = document.getElementById(`${videoId}Placeholder`);
+  if (video && placeholder) {
+    placeholder.style.display = "none";
+    video.hidden = false;
+  }
+}
+
+function showPlaceholder(videoId) {
+  const video = document.getElementById(videoId);
+  const placeholder = document.getElementById(`${videoId}Placeholder`);
+  if (video && placeholder) {
+    placeholder.style.display = "block";
+    video.hidden = true;
+    video.pause();
+    video.srcObject = null;
+  }
+}
