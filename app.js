@@ -879,7 +879,7 @@ const swaggerDefinition = {
   },
   servers: [
     {
-      url: `http://localhost:${port}`,
+      url: `https://localhost:${port}`,
     },
   ],
 };
