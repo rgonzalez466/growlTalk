@@ -1,10 +1,15 @@
 ENHANCEMENTS
 - create a standard model for logging errors and responses
-
+- add a hangup fuunction
+- show how many other kiosks in Q
+- show connected with kiosk XXXX
+- see if can add an id to the stream
 
 BUGS 
-- if the server is restarted , the web client should reconnect (bug)
+- if the server is restarted , the web client should reconnect 
 - when refresh or close windows ... should log out client
-- after a while , the client will disconnect (bug)
-- add try catch to get all exceptions (bug)
-- if a kiosk has left and try to connect ... then remove it , rather an exception (bug)
+- after a while , the client will disconnect 
+- add try catch to get all exceptions 
+- if a kiosk has left and try to connect ... then remove it , rather an exception 
+- stop local webcam upon call end
+- don't start local webcam until call answer
